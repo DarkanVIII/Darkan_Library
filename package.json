@@ -1,8 +1,10 @@
 {
-  "name": "com.darkanviii.library",
-  "displayName": "Darkan Library",
-  "version": "1.0.0",
-  "description": "A very useful package, indeed.",
-  "author": "DarkanVIII",
-  "hideInEditor": false
+    "name": "com.darkanviii.library",
+    "displayName": "Darkan Library",
+    "version": "1.0.0",
+    "description": "A very useful package, indeed.",
+    "author": "DarkanVIII",
+    "unity": {
+        "packagePath": "Assets"
+    }
 }
