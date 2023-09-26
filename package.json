@@ -3,8 +3,5 @@
     "displayName": "Darkan Library",
     "version": "1.0.0",
     "description": "A very useful package, indeed.",
-    "author": "DarkanVIII",
-    "unity": {
-        "packagePath": "Assets"
-    }
+    "author": "DarkanVIII"
 }
