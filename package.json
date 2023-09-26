@@ -1,7 +1,8 @@
 {
-    "name": "com.darkanviii.library",
-    "displayName": "Darkan Library",
-    "version": "1.0.0",
-    "description": "A very useful package, indeed.",
-    "author": "DarkanVIII"
+  "name": "com.darkanviii.library",
+  "displayName": "Darkan Library",
+  "version": "1.0.0",
+  "description": "A very useful package, indeed.",
+  "author": "DarkanVIII",
+  "hideInEditor": false
 }
