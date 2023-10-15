@@ -49,4 +49,5 @@ public class InputManager : MonoBehaviour
         return _inputActions.Player.Move.ReadValue<Vector2>().y;
     }
 
+
 }
