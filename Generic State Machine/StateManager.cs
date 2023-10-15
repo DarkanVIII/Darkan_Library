@@ -15,9 +15,9 @@ namespace Darkan.StateMachine
     {
         public static event Action<TEnum> OnGameStateChanged;
 
-        protected Dictionary<TEnum, BaseState<TEnum>> States = new();
+        protected Dictionary<TEnum, BaseState<TEnum, StateManager<TEnum>>> States = new();
 
-        protected BaseState<TEnum> ActiveState;
+        protected BaseState<TEnum, StateManager<TEnum>> ActiveState;
 
         void Start()
         {
@@ -35,7 +35,7 @@ namespace Darkan.StateMachine
             ActiveState.Update();
         }
 
-        void TransitionToState(TEnum nextState)
+        protected void TransitionToState(TEnum nextState)
         {
             ActiveState.OnNextState -= TransitionToState;
             ActiveState.Exit();
