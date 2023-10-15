@@ -2,7 +2,7 @@
   "name": "com.darkanviii.library",
   "displayName": "Darkan Library",
   "version": "1.0.0",
-  "description": "A very useful package, indeed.",
+  "description": "This package depends on: Odin Inspector and Serializer",
   "author": "DarkanVIII",
   "hideInEditor": false
 }
