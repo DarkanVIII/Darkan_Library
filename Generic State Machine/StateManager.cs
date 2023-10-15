@@ -11,13 +11,13 @@ namespace Darkan.StateMachine
     /// Invoking the <see cref="BaseState{TEnum}.OnNextState"/> event will automatically transition to the state passed in as an argument.<br/>
     /// To use Collision functions simply do: OnTriggerEnter(Collision collision) { ActiveState.OnTriggerEnter(collision) }
     /// </summary>
-    public abstract class StateManager<TEnum> : MonoBehaviour where TEnum : Enum
+    public abstract class StateManager<TEnum, TManager> : MonoBehaviour where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
         public static event Action<TEnum> OnGameStateChanged;
 
-        protected Dictionary<TEnum, BaseState<TEnum, StateManager<TEnum>>> States = new();
+        protected Dictionary<TEnum, BaseState<TEnum, TManager>> States = new();
 
-        protected BaseState<TEnum, StateManager<TEnum>> ActiveState;
+        protected BaseState<TEnum, TManager> ActiveState;
 
         void Start()
         {
