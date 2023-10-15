@@ -13,6 +13,8 @@ namespace Darkan.StateMachine
     /// </summary>
     public abstract class StateManager<TEnum> : MonoBehaviour where TEnum : Enum
     {
+        public static event Action<TEnum> OnGameStateChanged;
+
         protected Dictionary<TEnum, BaseState<TEnum>> States = new();
 
         protected BaseState<TEnum> ActiveState;
@@ -42,6 +44,8 @@ namespace Darkan.StateMachine
 
             ActiveState.OnNextState += TransitionToState;
             ActiveState.Enter();
+
+            OnGameStateChanged?.Invoke(nextState);
         }
     }
 }
