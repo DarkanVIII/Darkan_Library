@@ -21,7 +21,6 @@ namespace Darkan.StateMachine
         public abstract void Enter();
         public abstract void Exit();
         public abstract void Update();
-        public abstract event Action<TEnum> OnNextState;
         public virtual void OnTriggerEnter(Collider collider) { }
         public virtual void OnTriggerExit(Collider collider) { }
         public virtual void OnTriggerStay(Collider collider) { }

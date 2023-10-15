@@ -21,13 +21,7 @@ namespace Darkan.StateMachine
 
         void Start()
         {
-            ActiveState.OnNextState += TransitionToState;
             ActiveState.Enter();
-        }
-
-        void OnDestroy()
-        {
-            ActiveState.OnNextState -= TransitionToState;
         }
 
         void Update()
@@ -35,14 +29,12 @@ namespace Darkan.StateMachine
             ActiveState.Update();
         }
 
-        protected void TransitionToState(TEnum nextState)
+        public void TransitionToState(TEnum nextState)
         {
-            ActiveState.OnNextState -= TransitionToState;
             ActiveState.Exit();
 
             ActiveState = States[nextState];
 
-            ActiveState.OnNextState += TransitionToState;
             ActiveState.Enter();
 
             OnGameStateChanged?.Invoke(nextState);
