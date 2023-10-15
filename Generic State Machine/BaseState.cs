@@ -3,17 +3,20 @@ namespace Darkan.StateMachine
     using System;
     using UnityEngine;
 
-    public abstract class BaseState<TEnum> where TEnum : Enum
+    public abstract class BaseState<TEnum, TManager> where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
-        public BaseState(TEnum key)
+        public BaseState(TEnum key, TManager stateManager)
         {
             Key = key;
+            StateManager = stateManager;
         }
 
 #if RELEASE
         public TEnum Key;
+        public TManager StateManager;
 #else
         public TEnum Key { get; private set; }
+        public TManager StateManager { get; private set; }
 #endif
         public abstract void Enter();
         public abstract void Exit();
