@@ -1,16 +1,15 @@
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Darkan.Tools
 {
-    public class Tools : MonoBehaviour
+    using System.Collections.Generic;
+
+    public static class Tools
     {
         /// <summary>Invoke every second, or when necessary, for better performance</summary>
         /// <returns>String in format mm:ss with m and s rounded down</returns>
-        public static string GetTimerString(float timer)
+        public static string GetTimerString(float timerInSec)
         {
-            float minutes = (int)(timer / 60);
-            float seconds = (int)(timer % 60);
+            float minutes = (int)(timerInSec / 60);
+            float seconds = (int)(timerInSec % 60);
 
             return (minutes * 100 + seconds).ToString("00:00");
         }

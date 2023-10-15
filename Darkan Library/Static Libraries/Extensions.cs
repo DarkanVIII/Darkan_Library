@@ -1,8 +1,9 @@
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Darkan.Extensions
 {
+    using GameHelper;
+    using System.Collections.Generic;
+    using UnityEngine;
+
     public static class Extensions
     {
         /// <returns>Integer with the provided ratio as percentage</returns>

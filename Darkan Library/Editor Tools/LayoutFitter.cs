@@ -2,6 +2,7 @@ using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(RectTransform))]
 public class LayoutFitter : MonoBehaviour
 {
     public enum AlignVertically { Top, Center, Bottom };
