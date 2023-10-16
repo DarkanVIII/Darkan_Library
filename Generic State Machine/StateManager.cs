@@ -14,6 +14,14 @@ namespace Darkan.StateMachine
 
         protected BaseState<TEnum, TManager> ActiveState;
 
+        void Awake()
+        {
+            foreach (var state in States)
+            {
+                state.Value.StateManager = (TManager)this;
+            }
+        }
+
         void Start()
         {
             if (ActiveState == null)

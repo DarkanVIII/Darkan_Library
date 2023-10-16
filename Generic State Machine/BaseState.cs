@@ -6,19 +6,8 @@ namespace Darkan.StateMachine
 
     public abstract class BaseState<TEnum, TManager> : SerializedScriptableObject where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
-        public BaseState(TEnum key, TManager stateManager)
-        {
-            Key = key;
-            StateManager = stateManager;
-        }
-
-#if RELEASE
-        public TEnum Key;
         public TManager StateManager;
-#else
-        public TEnum Key { get; private set; }
-        public TManager StateManager { get; private set; }
-#endif
+
         public abstract void Enter();
         public abstract void Exit();
         public abstract void Update();
