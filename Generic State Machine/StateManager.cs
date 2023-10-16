@@ -6,6 +6,15 @@ namespace Darkan.StateMachine
     using System.Linq;
     using UnityEngine;
 
+    /// <summary>
+    /// To use: <br/>
+    /// 1. Derive a State Manager from this and create a State Enum in it <br/>
+    /// 2. Derive States from <see cref="BaseState{TEnum, TManager}"/> <br/>
+    /// 3. Add AssetMenu Attribute to Base State and create a Scriptablöe Objects for each State
+    /// 4. Add State Objects to Disctionary of State Manager
+    /// Optional: Set Active State in Awake -> Starting State (Default is index 0 in Dictionary) <br/>
+    /// To use Unity Messages like Update and OnTriggerEnter -> For Example add in State Manager : Update { ActiveState.Update }
+    /// </summary>
     public abstract class StateManager<TEnum, TManager> : SerializedMonoBehaviour where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
         public static event Action<TEnum> OnGameStateChanged;
