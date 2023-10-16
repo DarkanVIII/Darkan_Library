@@ -1,9 +1,10 @@
 namespace Darkan.StateMachine
 {
+    using Sirenix.OdinInspector;
     using System;
     using UnityEngine;
 
-    public abstract class BaseState<TEnum, TManager> : ScriptableObject where TEnum : Enum where TManager : StateManager<TEnum, TManager>
+    public abstract class BaseState<TEnum, TManager> : SerializedScriptableObject where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
         public BaseState(TEnum key, TManager stateManager)
         {
