@@ -18,7 +18,7 @@ namespace Darkan.StateMachine
         {
             foreach (var state in States)
             {
-                state.Value.StateManager = (TManager)this;
+                state.Value.Init((TManager)this);
             }
         }
 

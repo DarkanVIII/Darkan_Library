@@ -6,7 +6,16 @@ namespace Darkan.StateMachine
 
     public abstract class BaseState<TEnum, TManager> : SerializedScriptableObject where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
+#if !RELEASE
+        public TManager StateManager { get; private set; }
+#else
         public TManager StateManager;
+#endif
+
+        public void Init(TManager stateManager)
+        {
+            StateManager = stateManager;
+        }
 
         public abstract void Enter();
         public abstract void Exit();
