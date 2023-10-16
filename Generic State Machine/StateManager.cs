@@ -30,11 +30,6 @@ namespace Darkan.StateMachine
             ActiveState.Enter();
         }
 
-        void Update()
-        {
-            ActiveState.Update();
-        }
-
         public void TransitionToState(TEnum nextState)
         {
             ActiveState.Exit();
