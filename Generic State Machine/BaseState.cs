@@ -21,8 +21,8 @@ namespace Darkan.StateMachine
         public abstract void Enter();
         public abstract void Exit();
         /// <summary>
-        /// Unsubscribe from events and delegates here and call this in <see cref="Exit"/>.
-        /// Will make sure the state unsubscribes if the state wasn't exited (game closed)
+        /// Unsubscribe from events and delegates here. <br/>
+        /// Is called when exiting this state and when closing the game.
         /// </summary>
         public abstract void Unsubscribe();
         public virtual void Update() { }

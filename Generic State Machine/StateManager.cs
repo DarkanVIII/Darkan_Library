@@ -42,6 +42,7 @@ namespace Darkan.StateMachine
 
         public void TransitionToState(TEnum nextState)
         {
+            ActiveState.Unsubscribe();
             ActiveState.Exit();
 
             ActiveState = States[nextState];
