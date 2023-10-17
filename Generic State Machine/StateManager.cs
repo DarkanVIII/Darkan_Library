@@ -28,6 +28,7 @@ namespace Darkan.StateMachine
             foreach (var state in States)
             {
                 state.Value.Init((TManager)this);
+                state.Value.OnAwake();
             }
         }
 

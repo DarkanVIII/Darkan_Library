@@ -17,6 +17,7 @@ namespace Darkan.StateMachine
             StateManager = stateManager;
         }
 
+        public abstract void OnAwake();
         public abstract void Enter();
         public abstract void Exit();
         public virtual void Update() { }
