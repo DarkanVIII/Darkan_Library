@@ -20,6 +20,11 @@ namespace Darkan.StateMachine
         public abstract void OnAwake();
         public abstract void Enter();
         public abstract void Exit();
+        /// <summary>
+        /// Unsubscribe from events and delegates here and call this in <see cref="Exit"/>.
+        /// Will make sure the state unsubscribes if the state wasn't exited (game closed)
+        /// </summary>
+        public abstract void Unsubscribe();
         public virtual void Update() { }
         public virtual void FixedUpdate() { }
         public virtual void OnTriggerEnter(Collider collider) { }

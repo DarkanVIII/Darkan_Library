@@ -50,5 +50,10 @@ namespace Darkan.StateMachine
 
             OnGameStateChanged?.Invoke(nextState);
         }
+
+        void OnDestroy()
+        {
+            ActiveState.Unsubscribe();
+        }
     }
 }
