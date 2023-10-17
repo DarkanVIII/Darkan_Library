@@ -42,7 +42,6 @@ namespace Darkan.StateMachine
 
         public void TransitionToState(TEnum nextState)
         {
-            ActiveState.Unsubscribe();
             ActiveState.Exit();
 
             ActiveState = States[nextState];
@@ -54,7 +53,7 @@ namespace Darkan.StateMachine
 
         void OnDestroy()
         {
-            ActiveState.Unsubscribe();
+            ActiveState.Exit();
         }
     }
 }
