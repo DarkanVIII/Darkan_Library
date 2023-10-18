@@ -17,7 +17,7 @@ namespace Darkan.StateMachine
     /// </summary>
     public abstract class StateManager<TEnum, TManager> : SerializedMonoBehaviour where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
-        public static event Action<TEnum> OnGameStateChanged;
+        public static event Action<TEnum> OnStateChanged;
 
         [SerializeField] protected Dictionary<TEnum, BaseState<TEnum, TManager>> States = new();
 
@@ -30,6 +30,8 @@ namespace Darkan.StateMachine
                 keyValuePair.Value.Init((TManager)this);
                 keyValuePair.Value.AwakeState();
             }
+
+            Application.quitting += () => ActiveState.ExitState();
         }
 
         void Start()
@@ -48,12 +50,13 @@ namespace Darkan.StateMachine
 
             ActiveState.EnterState();
 
-            OnGameStateChanged?.Invoke(nextState);
+            OnStateChanged?.Invoke(nextState);
         }
 
-        void OnDisable()
+        void OnDestroy()
         {
-            ActiveState.ExitState();
+            //ActiveState.Unsubscribe();
+            Application.quitting -= () => ActiveState.ExitState();
         }
     }
 }
