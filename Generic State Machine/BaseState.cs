@@ -20,7 +20,6 @@ namespace Darkan.StateMachine
         public abstract void AwakeState();
         public abstract void EnterState();
         public abstract void ExitState();
-        public abstract void Unsubscribe();
         public virtual void UpdateState() { }
         public virtual void FixedUpdateState() { }
         public virtual void OnTriggerEnterState(Collider collider) { }

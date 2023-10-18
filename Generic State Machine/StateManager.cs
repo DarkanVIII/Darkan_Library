@@ -55,7 +55,6 @@ namespace Darkan.StateMachine
 
         void OnDestroy()
         {
-            //ActiveState.Unsubscribe();
             Application.quitting -= () => ActiveState.ExitState();
         }
     }
