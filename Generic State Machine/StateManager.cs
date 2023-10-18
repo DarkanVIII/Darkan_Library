@@ -25,35 +25,35 @@ namespace Darkan.StateMachine
 
         void Awake()
         {
-            foreach (var state in States)
+            foreach (var keyValuePair in States)
             {
-                state.Value.Init((TManager)this);
-                state.Value.OnAwake();
+                keyValuePair.Value.Init((TManager)this);
+                keyValuePair.Value.AwakeState();
             }
         }
 
         void Start()
         {
             if (ActiveState == null)
-                ActiveState = States.First().Value;
+                ActiveState = States.Values.First();
 
-            ActiveState.Enter();
+            ActiveState.EnterState();
         }
 
         public void TransitionToState(TEnum nextState)
         {
-            ActiveState.Exit();
+            ActiveState.ExitState();
 
             ActiveState = States[nextState];
 
-            ActiveState.Enter();
+            ActiveState.EnterState();
 
             OnGameStateChanged?.Invoke(nextState);
         }
 
-        void OnDestroy()
+        void OnDisable()
         {
-            ActiveState.Exit();
+            ActiveState.ExitState();
         }
     }
 }

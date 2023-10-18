@@ -4,12 +4,12 @@ namespace Darkan.StateMachine
     using System;
     using UnityEngine;
 
-    public abstract class BaseState<TEnum, TManager> : SerializedScriptableObject where TEnum : Enum where TManager : StateManager<TEnum, TManager>
+    public abstract class BaseState<TEnum, TManager> : SerializedMonoBehaviour where TEnum : Enum where TManager : StateManager<TEnum, TManager>
     {
 #if !RELEASE
-        public TManager StateManager { get; private set; }
+        protected TManager StateManager { get; private set; }
 #else
-        public TManager StateManager;
+        protected TManager StateManager;
 #endif
 
         public void Init(TManager stateManager)
@@ -17,22 +17,22 @@ namespace Darkan.StateMachine
             StateManager = stateManager;
         }
 
-        public abstract void OnAwake();
-        public abstract void Enter();
-        public abstract void Exit();
-        public virtual void Update() { }
-        public virtual void FixedUpdate() { }
-        public virtual void OnTriggerEnter(Collider collider) { }
-        public virtual void OnTriggerExit(Collider collider) { }
-        public virtual void OnTriggerStay(Collider collider) { }
-        public virtual void OnTriggerEnter2D(Collider2D collider) { }
-        public virtual void OnTriggerExit2D(Collider2D collider) { }
-        public virtual void OnTriggerStay2D(Collider2D collider) { }
-        public virtual void OnCollisionEnter(Collision collision) { }
-        public virtual void OnCollisionStay(Collision collision) { }
-        public virtual void OnCollisionExit(Collision collision) { }
-        public virtual void OnCollisionEnter2D(Collision2D collision) { }
-        public virtual void OnCollisionStay2D(Collision2D collision) { }
-        public virtual void OnCollisionExit2D(Collision2D collision) { }
+        public abstract void AwakeState();
+        public abstract void EnterState();
+        public abstract void ExitState();
+        public virtual void UpdateState() { }
+        public virtual void FixedUpdateState() { }
+        public virtual void OnTriggerEnterState(Collider collider) { }
+        public virtual void OnTriggerExitState(Collider collider) { }
+        public virtual void OnTriggerStayState(Collider collider) { }
+        public virtual void OnTriggerEnter2DState(Collider2D collider) { }
+        public virtual void OnTriggerExit2DState(Collider2D collider) { }
+        public virtual void OnTriggerStay2DState(Collider2D collider) { }
+        public virtual void OnCollisionEnterState(Collision collision) { }
+        public virtual void OnCollisionStayState(Collision collision) { }
+        public virtual void OnCollisionExitState(Collision collision) { }
+        public virtual void OnCollisionEnter2DState(Collision2D collision) { }
+        public virtual void OnCollisionStay2DState(Collision2D collision) { }
+        public virtual void OnCollisionExit2DState(Collision2D collision) { }
     }
 }
