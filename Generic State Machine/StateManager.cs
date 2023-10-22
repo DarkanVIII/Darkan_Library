@@ -23,7 +23,7 @@ namespace Darkan.StateMachine
 
         protected BaseState<TEnum, TManager> ActiveState;
 
-        void Awake()
+        protected virtual void Awake()
         {
             foreach (var keyValuePair in States)
             {
@@ -34,7 +34,7 @@ namespace Darkan.StateMachine
             Application.quitting += () => ActiveState.ExitState();
         }
 
-        void Start()
+        protected virtual void Start()
         {
             if (ActiveState == null)
                 ActiveState = States.Values.First();
@@ -53,7 +53,7 @@ namespace Darkan.StateMachine
             OnStateChanged?.Invoke(nextState);
         }
 
-        void OnDestroy()
+        protected virtual void OnDestroy()
         {
             Application.quitting -= () => ActiveState.ExitState();
         }

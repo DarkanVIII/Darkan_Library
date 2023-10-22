@@ -4,5 +4,8 @@
   "version": "1.0.0",
   "description": "This package depends on: Odin Inspector and Serializer",
   "author": "DarkanVIII",
-  "hideInEditor": false
+  "hideInEditor": false,
+  "dependencies": {
+    "com.unity.textmeshpro": ""
+  }
 }
