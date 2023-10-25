@@ -4,7 +4,7 @@ namespace Darkan.UpgradeSystem.Value
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class UpgradeSlotValue : MonoBehaviour
+    public class UpgradeSlot : MonoBehaviour
     {
         [SerializeField] TextMeshProUGUI _description;
 

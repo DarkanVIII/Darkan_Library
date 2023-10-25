@@ -2,9 +2,8 @@
   "name": "com.darkanviii.library",
   "displayName": "Darkan Library",
   "version": "1.0.0",
-  "description": "This package depends on: Odin Inspector and Serializer",
+  "description": "This package depends on Asset Store assets: Odin Inspector and Serializer",
   "author": "DarkanVIII",
-  "hideInEditor": false,
   "dependencies": {
     "com.unity.textmeshpro": ""
   }

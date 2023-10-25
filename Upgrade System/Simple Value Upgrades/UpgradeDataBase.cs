@@ -5,7 +5,7 @@ namespace Darkan.UpgradeSystem.Value
     using System.Collections.Generic;
     using UnityEngine;
 
-    public abstract class UpgradeDataValueBase<TUpgrade, TRarety> : SerializedScriptableObject where TUpgrade : Enum where TRarety : Enum
+    public abstract class UpgradeDataBase<TUpgrade, TRarety> : SerializedScriptableObject where TUpgrade : Enum where TRarety : Enum
     {
         [Title("Upgrades")]
         [InfoBox("Warning: Changing the name of, or removing the enums used as Keys, will destroy all entries!")]

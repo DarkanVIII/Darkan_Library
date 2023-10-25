@@ -5,9 +5,9 @@ namespace Darkan.UpgradeSystem.Value
     using System.Collections.Generic;
     using UnityEngine;
 
-    public abstract class ValueUpgradeManagerBase<TUpgrade, TRarety> : SerializedMonoBehaviour where TUpgrade : Enum where TRarety : Enum
+    public abstract class UpgradeManagerBase<TUpgrade, TRarety> : SerializedMonoBehaviour where TUpgrade : Enum where TRarety : Enum
     {
-        [SerializeField] UpgradeDataValueBase<TUpgrade, TRarety> _upgradeData;
+        [SerializeField] UpgradeDataBase<TUpgrade, TRarety> _upgradeData;
         [SerializeField] Canvas _upgradeCanvas;
         [SerializeField] GameObject _slotPrefab;
 
@@ -129,7 +129,7 @@ namespace Darkan.UpgradeSystem.Value
 
                 string description = CreateDescription(upgrade);
 
-                transform.GetComponent<UpgradeSlotValue>().Populate(raretyColor, description);
+                transform.GetComponent<UpgradeSlot>().Populate(raretyColor, description);
             }
         }
 

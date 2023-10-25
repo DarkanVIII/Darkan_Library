@@ -4,10 +4,11 @@ namespace Darkan.UpgradeSystem.Ability
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class UpgradeManagerAbilityBase<TAbility> : SerializedMonoBehaviour where TAbility : System.Enum
+    public abstract class UpgradeManagerBase<TAbility> : SerializedMonoBehaviour where TAbility : System.Enum
     {
-        [SerializeField] UpgradeDataAbilityBase<TAbility> _upgradeData;
+        [SerializeField] UpgradeDataBase<TAbility> _upgradeData;
         [SerializeField] Canvas _upgradeCanvas;
+        [SerializeField] Transform _slotParent;
         [SerializeField] GameObject _slotPrefab;
 
         readonly List<TAbility> _availableUpgradeTypes = new();
@@ -16,18 +17,12 @@ namespace Darkan.UpgradeSystem.Ability
         readonly Stack<Transform> _cachedSlots = new();
         readonly Dictionary<TAbility, int> _abilityLevels = new();
 
-        public struct AbilityUpgrade
+        public struct UpgradeKey
         {
-            public TAbility UpgradeType;
-            public AbilityBase Ability;
+            public TAbility AbilityType;
             public int AbilityLevel;
-            public override readonly string ToString()
-            {
-                return $"{UpgradeType} Level {AbilityLevel}";
-            }
         }
-
-        protected virtual void Awake()
+        void Awake()
         {
             foreach (TAbility abilityType in System.Enum.GetValues(typeof(TAbility)))
             {
@@ -36,46 +31,48 @@ namespace Darkan.UpgradeSystem.Ability
             }
         }
 
-        public AbilityUpgrade GetRandomUpgrade()
+        bool TryGetRandomUpgrade(out UpgradeKey upgradeKey)
         {
+            if (_availableUpgradeTypes.Count == 0)
+            {
+                upgradeKey = default;
+                return false;
+            }
+
             int rand = Random.Range(0, _availableUpgradeTypes.Count);
 
             TAbility abilityType = _availableUpgradeTypes[rand];
 
-            AbilityBase ability;
-
-            int abilityLevel = 0;
+            int abilityLevel;
 
             if (_upgradeData.Upgrades.ContainsKey(abilityType))
             {
                 abilityLevel = _abilityLevels[abilityType] + 1;
-
-                ability = _upgradeData.Upgrades[abilityType][abilityLevel - 1];
-
-                int maxLevel = _upgradeData.Upgrades[abilityType].Count;
-
-                if (abilityLevel == maxLevel)
-                    _availableUpgradeTypes.Remove(abilityType);
             }
             else
             {
-                Debug.LogWarning($"Upgrade with Key {abilityType} could not be found. Returned null.");
-                ability = null;
+                Debug.LogWarning($"Upgrade with Key {abilityType} could not be found. Returned empty.");
+                upgradeKey = default;
+                return default;
             }
 
-            return new AbilityUpgrade()
+            upgradeKey = new UpgradeKey()
             {
-                UpgradeType = abilityType,
-                Ability = ability,
+                AbilityType = abilityType,
                 AbilityLevel = abilityLevel
             };
+
+            return true;
         }
 
+        [Title("Debug")]
+        [InfoBox("Use ingame to avoid having to clean up the slots manually")]
+        [Button]
         public void CreateUpgradeSelection(int amount)
         {
-            _upgradeCanvas.enabled = true;
+            if (amount < 1 || amount > 50) return;
 
-            Transform parent = _upgradeCanvas.transform.GetChild(0);
+            _upgradeCanvas.enabled = true;
 
             int neededSlots = amount - _slots.Count;
 
@@ -99,7 +96,11 @@ namespace Darkan.UpgradeSystem.Ability
                         slot.gameObject.SetActive(true);
                     }
                     else
-                        _slots.AddLast(Instantiate(_slotPrefab, parent).transform);
+                    {
+                        Transform transform = Instantiate(_slotPrefab, _slotParent).transform;
+                        transform.GetComponent<UpgradeSlotBase<TAbility>>().Init(this);
+                        _slots.AddLast(transform);
+                    }
                 }
             }
 
@@ -109,14 +110,15 @@ namespace Darkan.UpgradeSystem.Ability
             {
                 counter++;
 
-                AbilityUpgrade upgrade = GetRandomUpgrade();
+                if (TryGetRandomUpgrade(out UpgradeKey upgradeKey))
+                {
+                    _availableUpgradeTypes.Remove(upgradeKey.AbilityType);
+                    _cachedUpgradeTypes.Push(upgradeKey.AbilityType);
 
-                _availableUpgradeTypes.Remove(upgrade.UpgradeType);
-                _cachedUpgradeTypes.Push(upgrade.UpgradeType);
-
-                string description = CreateDescription(upgrade);
-
-                transform.GetComponent<UpgradeSlotAbility>().Populate(description);
+                    transform.GetComponent<UpgradeSlotBase<TAbility>>().Setup(upgradeKey);
+                }
+                else
+                    transform.GetComponent<UpgradeSlotBase<TAbility>>().Setup(upgradeKey, true);
             }
 
             _availableUpgradeTypes.AddRange(_cachedUpgradeTypes);
@@ -124,21 +126,25 @@ namespace Darkan.UpgradeSystem.Ability
         }
 
         /// <summary>
-        /// Pass in each selected Upgrade to Update the internal Ability Levels
+        /// Get Ability Data by Key. Also updates the current Ability Levels.
         /// </summary>
-        public void UpgradeSelected(AbilityUpgrade upgrade)
+        public AbilityDataBase GetAbilityData(UpgradeKey key)
         {
-            if (_abilityLevels.ContainsKey(upgrade.UpgradeType))
-            {
-                _abilityLevels[upgrade.UpgradeType] = upgrade.AbilityLevel;
-            }
-        }
 
-        protected virtual string CreateDescription(AbilityUpgrade upgrade)
-        {
-            return upgrade.ToString();
+            if (_abilityLevels.ContainsKey(key.AbilityType))
+            {
+                _upgradeCanvas.enabled = false;
+                _abilityLevels[key.AbilityType] = key.AbilityLevel;
+
+                int maxLevel = _upgradeData.Upgrades[key.AbilityType].Count;
+
+                if (key.AbilityLevel == maxLevel)
+                    _availableUpgradeTypes.Remove(key.AbilityType);
+
+                return _upgradeData.Upgrades[key.AbilityType][key.AbilityLevel - 1];
+            }
+            else
+                return null;
         }
     }
 }
-
-

@@ -1,8 +1,8 @@
-namespace Darkan.Tools
+namespace Darkan.Helpers
 {
     using System.Collections.Generic;
 
-    public static class Tools
+    public static class HelperFunctions
     {
         /// <summary>Invoke every second, or when necessary, for better performance</summary>
         /// <returns>String in format mm:ss with m and s rounded down</returns>

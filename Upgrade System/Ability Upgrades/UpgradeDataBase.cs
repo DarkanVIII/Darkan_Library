@@ -5,18 +5,18 @@ using UnityEngine;
 
 namespace Darkan.UpgradeSystem.Ability
 {
-    public abstract class UpgradeDataAbilityBase<TAbility> : SerializedScriptableObject
+    public abstract class UpgradeDataBase<TAbility> : SerializedScriptableObject where TAbility : System.Enum
     {
-        [InfoBox("Warning: Changing the name of, or removing the enums used as Keys, will destroy all entries!")]
+        [InfoBox("Warning: Changing the name of, or removing the enum used as Key, will remove all entries!")]
         [SerializeField]
         [PropertyOrder(-1)]
-        Dictionary<TAbility, List<AbilityBase>> _upgrades = new();
+        Dictionary<TAbility, List<AbilityDataBase>> _upgrades = new();
 
         [SerializeField]
         [PropertyOrder(1)]
         bool _lockDictionary;
 
-        public Dictionary<TAbility, List<AbilityBase>> Upgrades => _upgrades;
+        public Dictionary<TAbility, List<AbilityDataBase>> Upgrades => _upgrades;
 
         [ButtonGroup("Upgrades")]
         [PropertyOrder(0)]
@@ -27,7 +27,7 @@ namespace Darkan.UpgradeSystem.Ability
 
             foreach (TAbility tUpgrade in Enum.GetValues(typeof(TAbility)))
             {
-                _upgrades.Add(tUpgrade, new List<AbilityBase>());
+                _upgrades.Add(tUpgrade, new List<AbilityDataBase>());
             }
         }
 
@@ -42,7 +42,7 @@ namespace Darkan.UpgradeSystem.Ability
             {
                 if (_upgrades.ContainsKey(tUpgrade)) continue;
 
-                _upgrades.Add(tUpgrade, new List<AbilityBase>());
+                _upgrades.Add(tUpgrade, new List<AbilityDataBase>());
             }
         }
     }

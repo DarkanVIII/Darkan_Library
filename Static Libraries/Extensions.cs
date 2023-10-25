@@ -1,4 +1,4 @@
-namespace Darkan.Extensions
+namespace Darkan.Helpers
 {
     using GameHelper;
     using System.Collections.Generic;
