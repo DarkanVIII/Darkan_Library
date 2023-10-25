@@ -6,5 +6,6 @@
   "author": "DarkanVIII",
   "dependencies": {
     "com.unity.textmeshpro": ""
-  }
+  },
+  "unity": "2021.1"
 }
