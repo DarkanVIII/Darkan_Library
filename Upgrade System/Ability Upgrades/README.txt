@@ -14,3 +14,4 @@ SETUP DONE!!!
 
 To start an Uograde Selection call the TryCreateUpgradeSelection() Method of the Upgrade Manager
 To get a reference to the Selected Upgrade and to know when the selection is over subscribe to UpgradeSlot.OnFinishedSelection
+For custom Slot Descriptions override the Function GetDescription in AbilityData
