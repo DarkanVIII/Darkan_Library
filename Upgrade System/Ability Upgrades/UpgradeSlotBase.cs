@@ -12,7 +12,7 @@ namespace Darkan.UpgradeSystem.Ability
             _upgradeManager = upgradeManager;
         }
 
-        public static event System.Action<AbilityDataBase, UpgradeManagerBase<TAbility>.UpgradeKey> OnFinishedSelection;
+        public static event System.Action<AbilityDataBase<TAbility>, UpgradeManagerBase<TAbility>.UpgradeKey> OnFinishedSelection;
 
         [SerializeField] TextMeshProUGUI _description;
         [SerializeField] Button _button;
@@ -25,36 +25,43 @@ namespace Darkan.UpgradeSystem.Ability
         protected TextMeshProUGUI Description => _description;
         protected UpgradeManagerBase<TAbility> UpgradeManager => _upgradeManager;
         protected UpgradeManagerBase<TAbility>.UpgradeKey UpgradeKey => _upgradeKey;
-        protected bool NoData => _noData;
+        protected AbilityDataBase<TAbility> AbilityData => _abilityData;
 
         UpgradeManagerBase<TAbility> _upgradeManager;
         UpgradeManagerBase<TAbility>.UpgradeKey _upgradeKey;
 
-        bool _noData;
+        AbilityDataBase<TAbility> _abilityData;
 
         public void Select()
         {
-            AbilityDataBase data = _upgradeManager.GetAbilityData(_upgradeKey);
+            _upgradeManager.GetAbilityData(_upgradeKey);
 
-            OnFinishedSelection?.Invoke(data, _upgradeKey);
+            OnFinishedSelection?.Invoke(_abilityData, _upgradeKey);
         }
 
-        public void Setup(UpgradeManagerBase<TAbility>.UpgradeKey key, bool noData = false)
+        public void Setup(UpgradeManagerBase<TAbility>.UpgradeKey key, AbilityDataBase<TAbility> abilityData)
         {
-            _noData = noData;
             _upgradeKey = key;
-
-            _button.interactable = !_noData;
+            _abilityData = abilityData;
 
             Populate();
         }
 
+        public void EmptySlot()
+        {
+            PopulateEmpty();
+        }
+
+        protected virtual void PopulateEmpty()
+        {
+            _button.interactable = false;
+            _description.text = _emptySlotDescription;
+        }
+
         protected virtual void Populate()
         {
-            if
-                (_noData) _description.text = _emptySlotDescription;
-            else
-                _description.text = $"{_upgradeKey.AbilityType} Level {_upgradeKey.AbilityLevel}";
+            _button.interactable = true;
+            _description.text = _abilityData.GetDescription(_upgradeKey);
         }
 
         public void OnPointerDown(PointerEventData eventData) { }

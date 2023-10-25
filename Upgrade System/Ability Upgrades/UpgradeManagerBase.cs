@@ -122,10 +122,12 @@ namespace Darkan.UpgradeSystem.Ability
                     _availableUpgradeTypes.Remove(upgradeKey.AbilityType);
                     _cachedUpgradeTypes.Push(upgradeKey.AbilityType);
 
-                    transform.GetComponent<UpgradeSlotBase<TAbility>>().Setup(upgradeKey);
+                    AbilityDataBase<TAbility> abilityData = _upgradeData.Upgrades[upgradeKey.AbilityType][upgradeKey.AbilityLevel - 1];
+
+                    transform.GetComponent<UpgradeSlotBase<TAbility>>().Setup(upgradeKey, abilityData);
                 }
                 else
-                    transform.GetComponent<UpgradeSlotBase<TAbility>>().Setup(upgradeKey, true);
+                    transform.GetComponent<UpgradeSlotBase<TAbility>>().EmptySlot();
             }
 
             _availableUpgradeTypes.AddRange(_cachedUpgradeTypes);
@@ -137,7 +139,7 @@ namespace Darkan.UpgradeSystem.Ability
         /// <summary>
         /// Get Ability Data by Key. Also updates the current Ability Levels.
         /// </summary>
-        public AbilityDataBase GetAbilityData(UpgradeKey key)
+        public AbilityDataBase<TAbility> GetAbilityData(UpgradeKey key)
         {
 
             if (_abilityLevels.ContainsKey(key.AbilityType))

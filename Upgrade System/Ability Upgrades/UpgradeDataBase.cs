@@ -10,13 +10,13 @@ namespace Darkan.UpgradeSystem.Ability
         [InfoBox("Warning: Changing the name of, or removing the enum used as Key, will remove all entries!")]
         [SerializeField]
         [PropertyOrder(-1)]
-        Dictionary<TAbility, List<AbilityDataBase>> _upgrades = new();
+        Dictionary<TAbility, List<AbilityDataBase<TAbility>>> _upgrades = new();
 
         [SerializeField]
         [PropertyOrder(1)]
         bool _lockDictionary;
 
-        public Dictionary<TAbility, List<AbilityDataBase>> Upgrades => _upgrades;
+        public Dictionary<TAbility, List<AbilityDataBase<TAbility>>> Upgrades => _upgrades;
 
         [ButtonGroup("Upgrades")]
         [PropertyOrder(0)]
@@ -27,7 +27,7 @@ namespace Darkan.UpgradeSystem.Ability
 
             foreach (TAbility tUpgrade in Enum.GetValues(typeof(TAbility)))
             {
-                _upgrades.Add(tUpgrade, new List<AbilityDataBase>());
+                _upgrades.Add(tUpgrade, new List<AbilityDataBase<TAbility>>());
             }
         }
 
@@ -42,7 +42,7 @@ namespace Darkan.UpgradeSystem.Ability
             {
                 if (_upgrades.ContainsKey(tUpgrade)) continue;
 
-                _upgrades.Add(tUpgrade, new List<AbilityDataBase>());
+                _upgrades.Add(tUpgrade, new List<AbilityDataBase<TAbility>>());
             }
         }
     }
