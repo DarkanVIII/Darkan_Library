@@ -22,6 +22,7 @@ namespace Darkan.UpgradeSystem.Ability
             public TAbility AbilityType;
             public int AbilityLevel;
         }
+
         void Awake()
         {
             foreach (TAbility abilityType in System.Enum.GetValues(typeof(TAbility)))
@@ -67,9 +68,7 @@ namespace Darkan.UpgradeSystem.Ability
 
 
         /// <returns>False if no Upgrades are available or the amount is unresonable (smaller 1, bigger 50)</returns>
-        [Title("Debug")]
-        [InfoBox("Use ingame to avoid having to clean up the slots manually")]
-        [Button]
+        [Button("Debug Create Upgrade Selection (Use Ingame to avoid cleanup)")]
         public bool TryCreateUpgradeSelection(int amount)
         {
             if (amount < 1 || amount > 50) return false;
