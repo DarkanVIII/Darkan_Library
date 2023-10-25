@@ -65,12 +65,20 @@ namespace Darkan.UpgradeSystem.Ability
             return true;
         }
 
+
+        /// <returns>False if no Upgrades are available or the amount is unresonable (smaller 1, bigger 50)</returns>
         [Title("Debug")]
         [InfoBox("Use ingame to avoid having to clean up the slots manually")]
         [Button]
-        public void CreateUpgradeSelection(int amount)
+        public bool TryCreateUpgradeSelection(int amount)
         {
-            if (amount < 1 || amount > 50) return;
+            if (amount < 1 || amount > 50) return false;
+
+            if (_availableUpgradeTypes.Count == 0)
+            {
+                Debug.LogWarning("No available Upgrades found");
+                return false;
+            }
 
             _upgradeCanvas.enabled = true;
 
@@ -123,6 +131,8 @@ namespace Darkan.UpgradeSystem.Ability
 
             _availableUpgradeTypes.AddRange(_cachedUpgradeTypes);
             _cachedUpgradeTypes.Clear();
+
+            return true;
         }
 
         /// <summary>

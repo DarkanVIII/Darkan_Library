@@ -12,5 +12,5 @@ How to use:
 10. Go back to the Upgrade Manager and assign all references
 SETUP DONE!!!
 
-To start an Uograde Selection call the CreateUpgradeSelection() Method of the Upgrade Manager
+To start an Uograde Selection call the TryCreateUpgradeSelection() Method of the Upgrade Manager
 To get a reference to the Selected Upgrade and to know when the selection is over subscribe to UpgradeSlot.OnFinishedSelection
