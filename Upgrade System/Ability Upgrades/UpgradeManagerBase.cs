@@ -66,9 +66,16 @@ namespace Darkan.UpgradeSystem.Ability
             return true;
         }
 
+        [Button("Debug Try Create Upgrade Selection")]
+        bool DebugTryCreateUpgradeSelection(int amount)
+        {
+            if (!Application.isPlaying) return false;
+
+            if (TryCreateUpgradeSelection(amount)) return true;
+            else return false;
+        }
 
         /// <returns>False if no Upgrades are available or the amount is unresonable (smaller 1, bigger 50)</returns>
-        [Button("Debug Create Upgrade Selection (Use Ingame to avoid cleanup)")]
         public bool TryCreateUpgradeSelection(int amount)
         {
             if (amount < 1 || amount > 50) return false;
