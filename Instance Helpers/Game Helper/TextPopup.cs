@@ -14,7 +14,8 @@ namespace Darkan.GameHelper
         Tweener _fadeOutTweener;
 
         float _lastDistance;
-        float _lastduration;
+        float _lastDuration;
+        float _lastFadeTime;
 
         public event Action<TextPopup> OnReturnToPool;
 
@@ -22,7 +23,7 @@ namespace Darkan.GameHelper
         {
             _textMesh = GetComponent<TextMeshPro>();
 
-            _yPositionTweener = transform.DOMoveY(0, 2)
+            _yPositionTweener = transform.DOMoveY(1, 1)
             .SetAutoKill(false)
             .Pause()
             .SetEase(Ease.OutCubic);
@@ -36,19 +37,28 @@ namespace Darkan.GameHelper
             .OnComplete(() => OnReturnToPool(this));
         }
 
-        public void PlayPopup(string text, Color color, float distance = 1, float duration = 1, float fadeTime = .35f)
+        public void PlayPopup(string text, Color color, int fontSize, float distance = 1, float duration = 1, float fadeTime = .35f)
         {
             _textMesh.text = text;
             _textMesh.color = color;
+            _textMesh.fontSize = fontSize;
 
-            if (_lastDistance != distance || _lastduration != duration)
+            if (_lastDistance != distance || _lastDuration != duration)
                 _yPositionTweener.ChangeEndValue(new Vector3(0, distance, 0), duration);
+
+            if (_lastFadeTime != fadeTime)
+            {
+                _fadeInTweener.ChangeEndValue(1f, fadeTime);
+                _fadeOutTweener.ChangeEndValue(0f, fadeTime);
+            }
+
             _yPositionTweener.Restart();
             _fadeInTweener.Restart();
-            _fadeOutTweener.Restart(true, duration - .35f);
+            _fadeOutTweener.Restart(true, duration - fadeTime);
 
             _lastDistance = distance;
-            _lastduration = duration;
+            _lastDuration = duration;
+            _lastFadeTime = fadeTime;
         }
 
         void OnDestroy()
