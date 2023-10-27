@@ -10,19 +10,22 @@ namespace Darkan.GameHelper
 
     public class GameHelper : MonoBehaviour
     {
-#if UNITY_EDITOR
+#if !RELEASE
+        public static GameHelper I { get; private set; }
         public static Camera MainCamera { get; private set; }
 #else
-    public static Camera MainCamera;
+        public static GameHelper I;
+        public static Camera MainCamera;
 #endif
 
         void Awake()
         {
             DisableLoggingForBuilds();
 
+            I = this;
             MainCamera = Camera.main;
 
-            //SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
+            SceneManager.activeSceneChanged += SceneManager_activeSceneChanged;
 
             if (_useUIHelpers)
             {
@@ -33,7 +36,7 @@ namespace Darkan.GameHelper
 
         void OnDestroy()
         {
-            //SceneManager.activeSceneChanged -= SceneManager_activeSceneChanged;
+            SceneManager.activeSceneChanged -= SceneManager_activeSceneChanged;
         }
 
         void Update()
@@ -171,6 +174,31 @@ namespace Darkan.GameHelper
         {
             _eventSystem = EventSystem.current;
             _pointerEventData = new(_eventSystem);
+        }
+
+        #endregion
+
+        #region Text Popup
+
+        [SerializeField] Transform _textPopupPrefab;
+        Stack<TextPopup> _popupPool = new();
+
+        public void SpawnTextPopup(string text, Vector3 worldPosition, Color color)
+        {
+            TextPopup popup;
+
+            if (_popupPool.Count > 0)
+            {
+                popup = _popupPool.Pop();
+                popup.gameObject.SetActive(true);
+            }
+            else
+            {
+                popup = Instantiate(_textPopupPrefab).GetComponent<TextPopup>();
+            }
+
+            popup.transform.position = worldPosition;
+            popup.Popup(text, color, _popupPool, 5);
         }
 
         #endregion

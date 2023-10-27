@@ -1,6 +1,8 @@
 namespace Darkan.Helpers
 {
     using System.Collections.Generic;
+    using TMPro;
+    using UnityEngine;
 
     public static class HelperFunctions
     {
