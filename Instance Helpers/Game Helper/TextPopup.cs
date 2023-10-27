@@ -1,12 +1,11 @@
 using DG.Tweening;
-using Sirenix.OdinInspector;
-using System.Collections.Generic;
+using System;
 using TMPro;
 using UnityEngine;
 
 namespace Darkan.GameHelper
 {
-    public class TextPopup : MonoBehaviour
+    public class TextPopup : MonoBehaviour, IPooled<TextPopup>
     {
         TextMeshPro _textMesh;
         Sequence _popupSequence;
@@ -14,35 +13,42 @@ namespace Darkan.GameHelper
         Tweener _fadeInTweener;
         Tweener _fadeOutTweener;
 
+        float _lastDistance;
+        float _lastduration;
+
+        public event Action<TextPopup> OnReturnToPool;
+
         void Awake()
         {
             _textMesh = GetComponent<TextMeshPro>();
-            _textMesh.alpha = 0;
-            _popupSequence = DOTween.Sequence();
-            _yPositionTweener = transform.DOMoveY(transform.position.y + 1, 1).SetAutoKill(false).Pause();
-            _fadeInTweener = DOTween.To(() => _textMesh.alpha, x => _textMesh.alpha = x, 1, .35f).SetAutoKill(false).Pause();
-            _fadeOutTweener = DOTween.To(() => _textMesh.alpha, x => _textMesh.alpha = x, 0, .35f)
-                .SetAutoKill(false)
-                .Pause();
 
-            _popupSequence.Append(_yPositionTweener)
-                .Insert(0, _fadeInTweener)
-                .Insert(.65f, _fadeOutTweener)
-                .SetAutoKill(false)
-                .Pause()
-                .SetEase(Ease.OutSine);
+            _yPositionTweener = transform.DOMoveY(0, 2)
+            .SetAutoKill(false)
+            .Pause()
+            .SetEase(Ease.OutCubic);
+            _fadeInTweener = DOTween.To(() => 0f, x => _textMesh.alpha = x, 1, .35f)
+            .SetAutoKill(false)
+            .Pause()
+            .SetEase(Ease.InCubic);
+            _fadeOutTweener = DOTween.To(() => 1f, x => _textMesh.alpha = x, 0, .35f)
+            .SetAutoKill(false)
+            .Pause()
+            .OnComplete(() => OnReturnToPool(this));
         }
 
-        public void Popup(string text, Color color, Stack<TextPopup> pool, float duration = 1)
+        public void PlayPopup(string text, Color color, float distance = 1, float duration = 1, float fadeTime = .35f)
         {
             _textMesh.text = text;
             _textMesh.color = color;
-            _textMesh.alpha = 0;
 
-            _popupSequence.timeScale = 1 / duration;
-            _popupSequence.OnComplete(() => { pool.Push(this); gameObject.SetActive(false); });
+            if (_lastDistance != distance || _lastduration != duration)
+                _yPositionTweener.ChangeEndValue(new Vector3(0, distance, 0), duration);
+            _yPositionTweener.Restart();
+            _fadeInTweener.Restart();
+            _fadeOutTweener.Restart(true, duration - .35f);
 
-            _popupSequence.Restart();
+            _lastDistance = distance;
+            _lastduration = duration;
         }
 
         void OnDestroy()

@@ -1,5 +1,6 @@
 namespace Darkan.GameHelper
 {
+    using Darkan.ObjectPooling;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -32,6 +33,8 @@ namespace Darkan.GameHelper
                 UpdateEventSystem();
                 UpdateGraphicRaycasters();
             }
+
+            _popupPool = new(_textPopupPrefab.GetComponent<TextPopup>());
         }
 
         void OnDestroy()
@@ -181,24 +184,17 @@ namespace Darkan.GameHelper
         #region Text Popup
 
         [SerializeField] Transform _textPopupPrefab;
-        Stack<TextPopup> _popupPool = new();
+        SimpleObjectPool<TextPopup> _popupPool;
 
-        public void SpawnTextPopup(string text, Vector3 worldPosition, Color color)
+        /// <summary>
+        /// Uses Object Pooling and has no allocation, except when changing up distance and duration, but only a little
+        /// </summary>
+        public void SpawnTextPopup(string text, Vector3 worldPosition, Color color, float distance = 1, float duration = 1)
         {
-            TextPopup popup;
+            TextPopup textPopup = _popupPool.Take();
 
-            if (_popupPool.Count > 0)
-            {
-                popup = _popupPool.Pop();
-                popup.gameObject.SetActive(true);
-            }
-            else
-            {
-                popup = Instantiate(_textPopupPrefab).GetComponent<TextPopup>();
-            }
-
-            popup.transform.position = worldPosition;
-            popup.Popup(text, color, _popupPool, 5);
+            textPopup.transform.position = worldPosition;
+            textPopup.PlayPopup(text, color, distance, duration);
         }
 
         #endregion
