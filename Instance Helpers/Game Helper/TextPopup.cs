@@ -46,7 +46,7 @@ namespace Darkan.GameHelper
             _textMesh.fontSize = fontSize;
 
             if (_lastDistance != distance || _lastDuration != duration || _lastWorldpos != worldPos)
-                _yPositionTweener.ChangeValues(transform.position, transform.position + new Vector3(0, distance, 0) + worldPos, duration);
+                _yPositionTweener.ChangeValues(worldPos, worldPos + new Vector3(0, distance, 0), duration);
 
             if (_lastFadeTime != fadeTime)
             {
