@@ -54,7 +54,7 @@ namespace Darkan.ObjectPooling
             _countAll++;
 
             T obj = Object.Instantiate(_prefab);
-            obj.GetComponent<IPooled<T>>().OnReturnToPool += Release;
+            obj.GetComponent<IPoolable<T>>().OnReturnToPool += Release;
             return obj;
         }
 

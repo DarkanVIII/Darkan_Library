@@ -5,10 +5,9 @@ using UnityEngine;
 
 namespace Darkan.GameHelper
 {
-    public class TextPopup : MonoBehaviour, IPooled<TextPopup>
+    public class TextPopup : MonoBehaviour, IPoolable<TextPopup>
     {
         TextMeshPro _textMesh;
-        Sequence _popupSequence;
         Tweener _yPositionTweener;
         Tweener _fadeInTweener;
         Tweener _fadeOutTweener;
@@ -17,11 +16,15 @@ namespace Darkan.GameHelper
         float _lastDuration;
         float _lastFadeTime;
         Vector3 _lastWorldpos;
+        new Transform transform;
+
+        static readonly Vector3 ROTATION = new(0, 180, 0);
 
         public event Action<TextPopup> OnReturnToPool;
 
         void Awake()
         {
+            transform = GetComponent<Transform>();
             _textMesh = GetComponent<TextMeshPro>();
 
             _yPositionTweener = DOTween.To(() => transform.position, x => transform.position = x, Vector3.zero, .35f)
@@ -36,6 +39,12 @@ namespace Darkan.GameHelper
                 .SetAutoKill(false)
                 .Pause()
                 .SetEase(Ease.InCubic);
+        }
+
+        void Update()
+        {
+            transform.LookAt(GameHelper.MainCamera.transform.position);
+            transform.Rotate(ROTATION);
         }
 
         public void PlayPopup(string text, Color color, Vector3 worldPos, int fontSize, float distance = 1, float duration = 1, float fadeTime = .35f)
@@ -66,7 +75,6 @@ namespace Darkan.GameHelper
 
         void OnDestroy()
         {
-            _popupSequence.Kill();
             _yPositionTweener.Kill();
             _fadeInTweener.Kill();
             _fadeOutTweener.Kill();
