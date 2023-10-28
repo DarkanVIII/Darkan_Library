@@ -34,7 +34,7 @@ namespace Darkan.GameHelper
                 UpdateGraphicRaycasters();
             }
 
-            _popupPool = new(_textPopupPrefab.GetComponent<TextPopup>());
+            _popupPool = new(_textPopupPrefab.GetComponent<TextPopup>(), 0, true, false);
         }
 
         void OnDestroy()

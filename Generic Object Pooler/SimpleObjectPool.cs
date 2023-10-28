@@ -5,10 +5,11 @@ namespace Darkan.ObjectPooling
 {
     public class SimpleObjectPool<T> where T : MonoBehaviour
     {
-        public SimpleObjectPool(T prefab, int prefill = 0, bool getActivatedObjs = true)
+        public SimpleObjectPool(T prefab, int prefill = 0, bool activateObjOnGet = true, bool disableReturnedObjs = true)
         {
             _prefab = prefab;
-            _getActivatedObjs = getActivatedObjs;
+            _activateObjOnGet = activateObjOnGet;
+            _disableReturnedObjs = disableReturnedObjs;
 
             _pool = new(prefill);
             PrefillPool(prefill);
@@ -16,7 +17,8 @@ namespace Darkan.ObjectPooling
 
 
 
-        readonly bool _getActivatedObjs;
+        readonly bool _activateObjOnGet;
+        readonly bool _disableReturnedObjs;
         readonly T _prefab;
         readonly Stack<T> _pool;
         int _countAll;
@@ -63,20 +65,27 @@ namespace Darkan.ObjectPooling
             if (_pool.Count == 0)
             {
                 obj = CreateNewObject();
-                obj.gameObject.SetActive(_getActivatedObjs);
+
+                obj.gameObject.SetActive(_activateObjOnGet);
+
                 return obj;
             }
             else
             {
                 obj = _pool.Pop();
-                obj.gameObject.SetActive(_getActivatedObjs);
+
+                if (_activateObjOnGet)
+                    obj.gameObject.SetActive(true);
+
                 return obj;
             }
         }
 
         public void Release(T obj)
         {
-            obj.gameObject.SetActive(false);
+            if (_disableReturnedObjs)
+                obj.gameObject.SetActive(false);
+
             _pool.Push(obj);
         }
     }
