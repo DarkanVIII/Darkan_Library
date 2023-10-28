@@ -23,8 +23,7 @@ namespace Darkan.GameHelper
         {
             _textMesh = GetComponent<TextMeshPro>();
 
-            //_yPositionTweener = transform.DOMoveY(1, 1)
-            _fadeInTweener = DOTween.To(() => transform.position, x => transform.position = x, Vector3.zero, .35f)
+            _yPositionTweener = DOTween.To(() => transform.position, x => transform.position = x, Vector3.zero, .35f)
                  .SetAutoKill(false)
                  .Pause()
                  .SetEase(Ease.OutCubic);
