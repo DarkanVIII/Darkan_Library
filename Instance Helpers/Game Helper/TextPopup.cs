@@ -40,6 +40,7 @@ namespace Darkan.GameHelper
 
         public void PlayPopup(string text, Color color, Vector3 worldPos, int fontSize, float distance = 1, float duration = 1, float fadeTime = .35f)
         {
+            transform.position = worldPos;
             _textMesh.text = text;
             _textMesh.color = color;
             _textMesh.fontSize = fontSize;
