@@ -23,18 +23,19 @@ namespace Darkan.GameHelper
         {
             _textMesh = GetComponent<TextMeshPro>();
 
-            _yPositionTweener = transform.DOMoveY(1, 1)
-            .SetAutoKill(false)
-            .Pause()
-            .SetEase(Ease.OutCubic);
+            //_yPositionTweener = transform.DOMoveY(1, 1)
+            _fadeInTweener = DOTween.To(() => transform.position, x => transform.position = x, Vector3.zero, .35f)
+                 .SetAutoKill(false)
+                 .Pause()
+                 .SetEase(Ease.OutCubic);
             _fadeInTweener = DOTween.To(() => 0f, x => _textMesh.alpha = x, 1, .35f)
-            .SetAutoKill(false)
-            .Pause()
-            .SetEase(Ease.InCubic);
+                .SetAutoKill(false)
+                .Pause()
+                .SetEase(Ease.InCubic);
             _fadeOutTweener = DOTween.To(() => 1f, x => _textMesh.alpha = x, 0, .35f)
-            .SetAutoKill(false)
-            .Pause()
-            .OnComplete(() => OnReturnToPool(this));
+                .SetAutoKill(false)
+                .Pause()
+                .OnComplete(() => OnReturnToPool(this));
         }
 
         public void PlayPopup(string text, Color color, Vector3 worldPos, int fontSize, float distance = 1, float duration = 1, float fadeTime = .35f)
