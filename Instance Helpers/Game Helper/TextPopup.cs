@@ -47,7 +47,7 @@ namespace Darkan.GameHelper
             transform.Rotate(ROTATION);
         }
 
-        public void PlayPopup(string text, Color color, Vector3 worldPos, int fontSize, float distance = 1, float duration = 1, float fadeTime = .35f)
+        public void PlayPopup(string text, Color color, Vector3 worldPos, int fontSize = 8, float distance = .3f, float duration = 1.5f, float fadeTime = .35f)
         {
             transform.position = worldPos;
             _textMesh.text = text;

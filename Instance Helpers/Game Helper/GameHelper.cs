@@ -197,6 +197,14 @@ namespace Darkan.GameHelper
             textPopup.PlayPopup(text, color, worldPosition, fontSize, distance, duration, fadeTime);
         }
 
+        public void SpawnTextPopup(string text, Vector3 worldPosition)
+        {
+            TextPopup textPopup = _popupPool.Take();
+
+            textPopup.transform.SetParent(transform);
+            textPopup.PlayPopup(text, Color.white, worldPosition);
+        }
+
         #endregion
 
         void DisableLoggingForBuilds()
