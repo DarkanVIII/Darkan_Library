@@ -1,5 +1,6 @@
 using DG.Tweening;
 using System;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 
@@ -47,30 +48,32 @@ namespace Darkan.GameHelper
             transform.Rotate(ROTATION);
         }
 
-        public void PlayPopup(string text, Color color, Vector3 worldPos, int fontSize = 8, float distance = .3f, float duration = 1.5f, float fadeTime = .35f)
+        public void PlayPopup(TextPopupParams @params)
         {
-            transform.position = worldPos;
-            _textMesh.text = text;
-            _textMesh.color = color;
-            _textMesh.fontSize = fontSize;
+            _textMesh.text = @params.Text;
+            _textMesh.color = @params.Color;
+            _textMesh.fontSize = @params.FontSize;
 
-            if (_lastDistance != distance || _lastDuration != duration || _lastWorldpos != worldPos)
-                _yPositionTweener.ChangeValues(worldPos, worldPos + new Vector3(0, distance, 0), duration);
-
-            if (_lastFadeTime != fadeTime)
+            if (_lastDistance != @params.Distance || _lastDuration != @params.Duration || _lastWorldpos != @params.WorldPos)
             {
-                _fadeOutTweener.ChangeValues(1f, 0f, fadeTime);
-                _fadeInTweener.ChangeValues(0f, 1f, fadeTime);
+                _yPositionTweener.ChangeValues(@params.WorldPos,
+                    @params.WorldPos + new Vector3(0, @params.Distance, 0), @params.Duration);
+            }
+
+            if (_lastFadeTime != @params.FadeTime)
+            {
+                _fadeOutTweener.ChangeValues(1f, 0f, @params.FadeTime);
+                _fadeInTweener.ChangeValues(0f, 1f, @params.FadeTime);
             }
 
             _yPositionTweener.Restart();
             _fadeInTweener.Restart();
-            _fadeOutTweener.Restart(true, duration - fadeTime);
+            _fadeOutTweener.Restart(true, @params.Duration - @params.FadeTime);
 
-            _lastDistance = distance;
-            _lastDuration = duration;
-            _lastFadeTime = fadeTime;
-            _lastWorldpos = worldPos;
+            _lastDistance = @params.Distance;
+            _lastDuration = @params.Duration;
+            _lastFadeTime = @params.FadeTime;
+            _lastWorldpos = @params.WorldPos;
         }
 
         void OnDestroy()

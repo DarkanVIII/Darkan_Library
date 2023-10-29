@@ -189,20 +189,12 @@ namespace Darkan.GameHelper
         /// <summary>
         /// Uses Object Pooling and has no allocation, except when changing params a lot
         /// </summary>
-        public void SpawnTextPopup(string text, Vector3 worldPosition, Color color, int fontSize, float distance = 1, float duration = 1, float fadeTime = .35f)
+        public void SpawnTextPopup(TextPopupParams textPopupParams)
         {
             TextPopup textPopup = _popupPool.Take();
 
             textPopup.transform.SetParent(transform);
-            textPopup.PlayPopup(text, color, worldPosition, fontSize, distance, duration, fadeTime);
-        }
-
-        public void SpawnTextPopup(string text, Vector3 worldPosition)
-        {
-            TextPopup textPopup = _popupPool.Take();
-
-            textPopup.transform.SetParent(transform);
-            textPopup.PlayPopup(text, Color.white, worldPosition);
+            textPopup.PlayPopup(textPopupParams);
         }
 
         #endregion
