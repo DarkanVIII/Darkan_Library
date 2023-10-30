@@ -1,12 +1,14 @@
 namespace Darkan.UI
 {
+    using TMPro;
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class SmoothBar : MonoBehaviour
+    public class SmoothBarText : MonoBehaviour
     {
         [SerializeField] Image _fill;
         [SerializeField] Image _fillBetween;
+        [SerializeField] TextMeshProUGUI _textMesh;
         [Min(0.1f)] public float SmoothSpeed = 1;
 
         public Image Fill => _fill;
@@ -43,6 +45,7 @@ namespace Darkan.UI
                 SwapImages();
 
             _fillBetween.fillAmount = ratio;
+            _textMesh.text = GetBarText(value, maxValue);
         }
 
         /// <summary>
@@ -56,18 +59,12 @@ namespace Darkan.UI
             _targetValue = ratio;
             _fillBetween.fillAmount = ratio;
             _fill.fillAmount = ratio;
+            _textMesh.text = GetBarText(value, maxValue);
         }
 
-        /// <summary>
-        /// Sets bar hard by proportion (value between 0 and 1)
-        /// </summary>
-        public void SetProportion(float value)
+        protected virtual string GetBarText(float value, float maxValue)
         {
-            float value01 = Mathf.Clamp01(value);
-
-            _fillBetween.fillAmount = value01;
-            _fill.fillAmount = value01;
-            _targetValue = value01;
+            return $"{value}/{maxValue}";
         }
 
         void SwapImages()
