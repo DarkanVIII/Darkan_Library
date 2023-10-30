@@ -4,12 +4,11 @@ namespace Darkan.UI
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class SmoothBarText : MonoBehaviour
+    public class SmoothBarValue : MonoBehaviour
     {
         [SerializeField] Image _fill;
         [SerializeField] Image _fillBetween;
-        [SerializeField] TextMeshProUGUI _textMeshOver;
-        [SerializeField] TextMeshProUGUI _textMeshUnder;
+        [SerializeField] TextMeshProUGUI _textMesh;
         [Min(0.1f)] public float SmoothSpeed = 1;
 
         public Image Fill => _fill;
@@ -30,12 +29,6 @@ namespace Darkan.UI
             _fill.fillAmount = Mathf.MoveTowards(_fill.fillAmount, _targetValue, SmoothSpeed * 0.1f * Time.deltaTime);
         }
 
-        public void SetText(string text)
-        {
-            _textMeshOver.text = text;
-            _textMeshUnder.text = text;
-        }
-
         /// <summary>
         /// Updates the visuals of the bar with a smooth transition. value / maxValue. Clamps between 0 and 1.
         /// 0 is an empty, 1 a full Bar.
@@ -52,6 +45,7 @@ namespace Darkan.UI
                 SwapImages();
 
             _fillBetween.fillAmount = ratio;
+            _textMesh.text = GetBarText(value, maxValue);
         }
 
         /// <summary>
@@ -65,6 +59,7 @@ namespace Darkan.UI
             _targetValue = ratio;
             _fillBetween.fillAmount = ratio;
             _fill.fillAmount = ratio;
+            _textMesh.text = GetBarText(value, maxValue);
         }
 
         protected virtual string GetBarText(float value, float maxValue)
