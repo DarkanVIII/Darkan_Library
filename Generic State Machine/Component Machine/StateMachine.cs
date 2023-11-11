@@ -30,6 +30,7 @@ namespace Darkan.StateMachine.Component
             foreach (var keyValuePair in StatesDictionary)
             {
                 keyValuePair.Value.Init((TMachine)this);
+                keyValuePair.Value.enabled = false;
             }
         }
 
@@ -43,11 +44,13 @@ namespace Darkan.StateMachine.Component
 
         public void TransitionToState(TEnum nextState)
         {
+            ActiveState.ExitState();
             ActiveState.enabled = false;
 
             ActiveState = StatesDictionary[nextState];
 
             ActiveState.enabled = true;
+            ActiveState.EnterState();
 
             OnStateChanged?.Invoke(nextState);
         }

@@ -21,16 +21,6 @@ namespace Darkan.StateMachine.Component
             enabled = false;
         }
 
-        void OnEnable()
-        {
-            EnterState();
-        }
-
-        void OnDisable()
-        {
-            ExitState();
-        }
-
         public abstract void EnterState();
         /// <summary>
         /// Called OnApplicationQuit too to unsubscribe from possible events
