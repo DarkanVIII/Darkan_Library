@@ -37,6 +37,7 @@ namespace Darkan.StateMachine.Component
         protected virtual void Start()
         {
             ActiveState = StatesDictionary[SetEntryState()];
+            ActiveState.EnterState();
             ActiveState.enabled = true;
         }
 
@@ -49,8 +50,8 @@ namespace Darkan.StateMachine.Component
 
             ActiveState = StatesDictionary[nextState];
 
-            ActiveState.enabled = true;
             ActiveState.EnterState();
+            ActiveState.enabled = true;
 
             OnStateChanged?.Invoke(nextState);
         }
