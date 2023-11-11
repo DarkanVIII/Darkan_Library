@@ -1,24 +1,27 @@
-namespace Darkan.StateMachine
+namespace Darkan.StateMachine.Scriptable
 {
     using Sirenix.OdinInspector;
     using System;
     using UnityEngine;
 
-    public abstract class BaseState<TEnum, TManager> : SerializedMonoBehaviour where TEnum : Enum where TManager : StateManager<TEnum, TManager>
+    public abstract class BaseState<TEnum, TMachine> : SerializedScriptableObject where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
     {
 #if !RELEASE
-        protected TManager StateManager { get; private set; }
+        protected TMachine StateMachine { get; private set; }
 #else
-        protected TManager StateManager;
+        protected TManager StateMachine;
 #endif
 
-        public void Init(TManager stateManager)
+        public void Init(TMachine stateMachine)
         {
-            StateManager = stateManager;
+            StateMachine = stateMachine;
         }
 
         public abstract void AwakeState();
         public abstract void EnterState();
+        /// <summary>
+        /// Will be called OnApplicationQuit too to make sure unsibscribing happens
+        /// </summary>
         public abstract void ExitState();
         public virtual void UpdateState() { }
         public virtual void FixedUpdateState() { }
