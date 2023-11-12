@@ -7,9 +7,10 @@ namespace Darkan.InstanceHelpers
 
     public class TextPopup : MonoBehaviour
     {
-        public void Init(IObjectPool<TextPopup> objectPool)
+        public void Init(IObjectPool<TextPopup> objectPool, Transform spawnPosition)
         {
             _objectPool = objectPool;
+            _spawnPosition = spawnPosition;
         }
 
         static readonly Vector3 ROTATE_Y_180 = new(0, 180, 0);
@@ -20,6 +21,7 @@ namespace Darkan.InstanceHelpers
         Tweener _yPositionTweener;
         Tweener _fadeInTweener;
         Tweener _fadeOutTweener;
+        Transform _spawnPosition;
         new Transform transform;
 
         TextPopupParams _currPopupParams = TextPopupParams.BasicWhite;
@@ -31,7 +33,7 @@ namespace Darkan.InstanceHelpers
             transform = GetComponent<Transform>();
             _textMesh = GetComponent<TextMeshPro>();
 
-            _yPositionTweener = DOTween.To(() => transform.localPosition, x => transform.localPosition = x,
+            _yPositionTweener = DOTween.To(() => _spawnPosition.localPosition, x => transform.localPosition = x,
                 _currPopupParams.Offset + _currPopupParams.Distance, _currPopupParams.Duration)
                  .SetAutoKill(false)
                  .Pause()

@@ -20,7 +20,7 @@ namespace Darkan.InstanceHelpers
         TextPopup OnCreatePopup()
         {
             TextPopup popup = Instantiate(_textPopupPrefab, transform).GetComponent<TextPopup>();
-            popup.Init(_popupPool);
+            popup.Init(_popupPool, _spawnPosition);
             popup.gameObject.SetActive(false);
             return popup;
         }
