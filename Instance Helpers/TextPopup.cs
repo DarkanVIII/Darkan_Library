@@ -31,7 +31,7 @@ namespace Darkan.InstanceHelpers
             transform = GetComponent<Transform>();
             _textMesh = GetComponent<TextMeshPro>();
 
-            _yPositionTweener = DOTween.To(() => transform.position, x => transform.position = x,
+            _yPositionTweener = DOTween.To(() => transform.localPosition, x => transform.localPosition = x,
                 _currPopupParams.LocalPos + _currPopupParams.Distance, _currPopupParams.Duration)
                  .SetAutoKill(false)
                  .Pause()
