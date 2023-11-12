@@ -1,6 +1,6 @@
 namespace Darkan.Helpers
 {
-    using GameHelper;
+    using Darkan.InstanceHelpers;
     using System.Collections.Generic;
     using UnityEngine;
 

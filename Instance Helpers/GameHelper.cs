@@ -1,6 +1,5 @@
-namespace Darkan.GameHelper
+namespace Darkan.InstanceHelpers
 {
-    using Darkan.ObjectPooling;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -33,8 +32,6 @@ namespace Darkan.GameHelper
                 UpdateEventSystem();
                 UpdateGraphicRaycasters();
             }
-
-            _popupPool = new(_textPopupPrefab.GetComponent<TextPopup>());
         }
 
         void OnDestroy()
@@ -177,24 +174,6 @@ namespace Darkan.GameHelper
         {
             _eventSystem = EventSystem.current;
             _pointerEventData = new(_eventSystem);
-        }
-
-        #endregion
-
-        #region Text Popup
-
-        [SerializeField] Transform _textPopupPrefab;
-        SimpleObjectPool<TextPopup> _popupPool;
-
-        /// <summary>
-        /// Uses Object Pooling and has no allocation, except when changing params a lot
-        /// </summary>
-        public void SpawnTextPopup(TextPopupParams textPopupParams)
-        {
-            TextPopup textPopup = _popupPool.Take();
-
-            textPopup.transform.SetParent(transform);
-            textPopup.PlayPopup(textPopupParams);
         }
 
         #endregion

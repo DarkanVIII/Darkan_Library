@@ -1,6 +1,6 @@
 namespace Darkan.Selection
 {
-    using Darkan.GameHelper;
+    using Darkan.InstanceHelpers;
     using Sirenix.OdinInspector;
     using System.Collections.Generic;
     using UnityEngine;
