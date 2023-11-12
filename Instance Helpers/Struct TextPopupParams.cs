@@ -11,7 +11,7 @@ namespace Darkan.InstanceHelpers
         public Vector3 Distance;
         public float FadeTime;
         public float FontSize;
-        public Vector3 LocalPos;
+        public Vector3 Offset;
 
         public static TextPopupParams BasicWhite
         {
@@ -26,7 +26,7 @@ namespace Darkan.InstanceHelpers
                     Distance = new(0, .3f, 0),
                     FadeTime = .35f,
                     FontSize = 8.5f,
-                    LocalPos = Vector3.zero,
+                    Offset = Vector3.zero,
                 };
             }
         }

@@ -32,7 +32,7 @@ namespace Darkan.InstanceHelpers
             _textMesh = GetComponent<TextMeshPro>();
 
             _yPositionTweener = DOTween.To(() => transform.localPosition, x => transform.localPosition = x,
-                _currPopupParams.LocalPos + _currPopupParams.Distance, _currPopupParams.Duration)
+                _currPopupParams.Offset + _currPopupParams.Distance, _currPopupParams.Duration)
                  .SetAutoKill(false)
                  .Pause()
                  .SetEase(Ease.OutCubic);
@@ -78,10 +78,10 @@ namespace Darkan.InstanceHelpers
 
             if (_currPopupParams.Distance != popupParams.Distance
             || _currPopupParams.Duration != popupParams.Duration
-            || _currPopupParams.LocalPos != popupParams.LocalPos)
+            || _currPopupParams.Offset != popupParams.Offset)
             {
-                _yPositionTweener.ChangeValues(popupParams.LocalPos,
-                    popupParams.LocalPos + popupParams.Distance, popupParams.Duration);
+                _yPositionTweener.ChangeValues(popupParams.Offset,
+                    popupParams.Offset + popupParams.Distance, popupParams.Duration);
             }
 
             _currPopupParams = popupParams;

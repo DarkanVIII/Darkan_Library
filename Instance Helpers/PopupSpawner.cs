@@ -7,6 +7,7 @@ namespace Darkan.InstanceHelpers
     public class PopupSpawner : MonoBehaviour
     {
         [SerializeField] Transform _textPopupPrefab;
+        [SerializeField] Transform _spawnPosition;
 
         readonly Queue<TextPopup> _queuedPopups = new();
         ObjectPool<TextPopup> _popupPool;
