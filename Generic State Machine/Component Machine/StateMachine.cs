@@ -58,7 +58,7 @@ namespace Darkan.StateMachine.Component
 
         void OnApplicationQuit()
         {
-            ActiveState.enabled = false;
+            ActiveState.ExitState();
         }
     }
 }
