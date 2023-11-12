@@ -1,14 +1,14 @@
-using Darkan.ObjectPooling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-
 namespace Darkan.GameHelper
 {
+    using Darkan.ObjectPooling;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UnityEngine;
+    using UnityEngine.EventSystems;
+    using UnityEngine.SceneManagement;
+    using UnityEngine.UI;
+
     public class GameHelper : MonoBehaviour
     {
 #if !RELEASE
@@ -201,8 +201,8 @@ namespace Darkan.GameHelper
 
         void DisableLoggingForBuilds()
         {
-#if !UNITY_EDITOR
-        Debug.unityLogger.logEnabled = false;
+#if RELEASE
+            Debug.unityLogger.logEnabled = false;
 #endif
         }
     }

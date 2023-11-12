@@ -1,11 +1,9 @@
-using DG.Tweening;
-using System;
-using System.Runtime.CompilerServices;
-using TMPro;
-using UnityEngine;
-
 namespace Darkan.GameHelper
 {
+    using DG.Tweening;
+    using TMPro;
+    using UnityEngine;
+
     public class TextPopup : MonoBehaviour, IPoolable<TextPopup>
     {
         TextMeshPro _textMesh;
@@ -21,7 +19,7 @@ namespace Darkan.GameHelper
 
         static readonly Vector3 ROTATION = new(0, 180, 0);
 
-        public event Action<TextPopup> OnReturnToPool;
+        public event System.Action<TextPopup> OnReturnToPool;
 
         void Awake()
         {

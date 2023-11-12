@@ -1,8 +1,8 @@
-using System.Runtime.CompilerServices;
-using UnityEngine;
-
 namespace Darkan.GameHelper
 {
+    using System.Runtime.CompilerServices;
+    using UnityEngine;
+
     public struct TextPopupParams
     {
         public string Text;
