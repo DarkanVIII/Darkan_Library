@@ -5,6 +5,17 @@ namespace Darkan.InstanceHelpers
 
     public struct TextPopupParams
     {
+        public TextPopupParams(TextPopupParams paramPreset = default)
+        {
+            Text = paramPreset.Text;
+            Color = paramPreset.Color;
+            Duration = paramPreset.Duration;
+            Distance = paramPreset.Distance;
+            FadeTime = paramPreset.FadeTime;
+            FontSize = paramPreset.FontSize;
+            Offset = paramPreset.Offset;
+        }
+
         public string Text;
         public Color Color;
         public float Duration;
