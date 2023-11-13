@@ -1,4 +1,4 @@
-namespace Darkan.InstanceHelpers
+namespace Darkan.RuntimeTools
 {
     using DG.Tweening;
     using TMPro;

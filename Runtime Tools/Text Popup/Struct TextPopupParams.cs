@@ -1,8 +1,9 @@
-namespace Darkan.InstanceHelpers
+namespace Darkan.RuntimeTools
 {
     using System.Runtime.CompilerServices;
     using UnityEngine;
 
+    [System.Serializable]
     public struct TextPopupParams
     {
         public TextPopupParams(TextPopupParams paramPreset = default)

@@ -1,4 +1,4 @@
-namespace Darkan.InstanceHelpers
+namespace Darkan.RuntimeTools
 {
     using System.Collections.Generic;
     using UnityEngine;
