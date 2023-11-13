@@ -18,7 +18,7 @@ namespace Darkan.RuntimeTools
 
         TextPopup OnCreatePopup()
         {
-            TextPopup popup = Instantiate(_textPopupPrefab).GetComponent<TextPopup>();
+            TextPopup popup = Instantiate(_textPopupPrefab, transform).GetComponent<TextPopup>();
             popup.Init(_popupPool);
             popup.gameObject.SetActive(false);
             return popup;
