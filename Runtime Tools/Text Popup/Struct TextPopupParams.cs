@@ -17,6 +17,7 @@ namespace Darkan.RuntimeTools
             Offset = paramPreset.Offset;
         }
 
+        [HideInInspector]
         public string Text;
         public Color Color;
         public float Duration;
