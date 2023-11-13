@@ -31,8 +31,8 @@ namespace Darkan.RuntimeTools
             transform = GetComponent<Transform>();
             _textMesh = GetComponent<TextMeshPro>();
 
-            Vector3 startPos = transform.position + _currPopupParams.Offset;
-            _yPositionTweener = DOTween.To(() => startPos, x => transform.position = x + _currPopupParams.Offset,
+            Vector3 startPos = transform.localPosition + _currPopupParams.Offset;
+            _yPositionTweener = DOTween.To(() => startPos, x => transform.localPosition = x + _currPopupParams.Offset,
                  startPos + _currPopupParams.Distance, _currPopupParams.Duration)
                  .SetAutoKill(false)
                  .Pause()
@@ -81,7 +81,7 @@ namespace Darkan.RuntimeTools
             || _currPopupParams.Duration != popupParams.Duration
             || _currPopupParams.Offset != popupParams.Offset)
             {
-                Vector3 startPos = transform.position + popupParams.Offset;
+                Vector3 startPos = transform.localPosition + popupParams.Offset;
                 _yPositionTweener.ChangeValues(startPos, startPos + popupParams.Distance, popupParams.Duration);
             }
 
