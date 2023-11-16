@@ -1,63 +1,64 @@
 namespace Darkan.RuntimeTools
 {
+    using Sirenix.OdinInspector;
     using System.Collections.Generic;
     using UnityEngine;
-    using UnityEngine.Pool;
 
-    public class PopupSpawner : MonoBehaviour
+    public class PopupSpawner : SerializedMonoBehaviour
     {
-        [SerializeField] Transform _textPopupPrefab;
+        [SerializeField]
+        [Required]
+        Transform _textPopupPrefab;
+        [SerializeField]
+        [Tooltip("Uses this transform if left empty")]
+        Transform _origin;
 
-        readonly Queue<TextPopup> _queuedPopups = new();
-        ObjectPool<TextPopup> _popupPool;
+        readonly Queue<TextPopupParams> _queuedParams = new();
+
+        int _popupsToSpawn;
+        TextPopup _cachedPopup;
 
         void Awake()
         {
-            _popupPool = new(OnCreatePopup, OnGetPopup, OnReleasePopup, OnDestroyPopup, false, 0);
-        }
+            if (_origin == null) _origin = transform;
 
-        TextPopup OnCreatePopup()
-        {
-            TextPopup popup = Instantiate(_textPopupPrefab, transform).GetComponent<TextPopup>();
-            popup.Init(_popupPool);
-            popup.gameObject.SetActive(false);
-            return popup;
-        }
-        void OnDestroyPopup(TextPopup popup)
-        {
-            Destroy(popup.gameObject);
-        }
-
-        void OnGetPopup(TextPopup popup)
-        {
-            _queuedPopups.Enqueue(popup);
-
-            if (_queuedPopups.Count == 1)
-            {
-                popup.gameObject.SetActive(true);
-                popup.PlayPopup();
-            }
-        }
-
-        void OnReleasePopup(TextPopup popup)
-        {
-            popup.gameObject.SetActive(false);
-            _queuedPopups.Dequeue();
-
-            if (_queuedPopups.Count > 0)
-            {
-                TextPopup textPopup = _queuedPopups.Peek();
-                textPopup.gameObject.SetActive(true);
-                textPopup.PlayPopup();
-            }
+            CreatePopup();
         }
 
         /// <summary>
-        /// Uses Object Pooling and has no allocation, except when changing params a lot
+        ///Has little to no allocation, except when changing params a lot
         /// </summary>
         public void SpawnPopup(TextPopupParams popupParams)
         {
-            _popupPool.Get().ChangePopupParams(popupParams);
+            _popupsToSpawn++;
+            _queuedParams.Enqueue(popupParams);
+
+            if (_popupsToSpawn == 1)
+                PlayNextPopup();
+        }
+
+        void CreatePopup()
+        {
+            _cachedPopup = Instantiate(_textPopupPrefab).GetComponent<TextPopup>();
+            _cachedPopup.Init(OnCompletedPopup, _origin);
+            _cachedPopup.gameObject.SetActive(false);
+        }
+
+        void OnCompletedPopup()
+        {
+            _popupsToSpawn--;
+
+            if (_popupsToSpawn > 0)
+                PlayNextPopup();
+            else
+                _cachedPopup.gameObject.SetActive(false);
+        }
+
+        void PlayNextPopup()
+        {
+            _cachedPopup.gameObject.SetActive(true);
+            _cachedPopup.ChangePopupParams(_queuedParams.Dequeue());
+            _cachedPopup.Play();
         }
     }
 }

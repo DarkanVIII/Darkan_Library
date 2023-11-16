@@ -1,39 +1,21 @@
 namespace Darkan.RuntimeTools
 {
     using DG.Tweening;
+    using System;
     using TMPro;
     using UnityEngine;
-    using UnityEngine.Pool;
 
     public class TextPopup : MonoBehaviour
     {
-        public void Init(IObjectPool<TextPopup> objectPool)
+        public void Init(Action onComplete, Transform origin)
         {
-            _objectPool = objectPool;
-        }
+            _onComplete = onComplete;
+            _origin = origin;
 
-        static readonly Vector3 ROTATE_Y_180 = new(0, 180, 0);
-
-        public TextPopupParams PopupParams => _currPopupParams;
-
-        TextMeshPro _textMesh;
-        Tweener _yPositionTweener;
-        Tweener _fadeInTweener;
-        Tweener _fadeOutTweener;
-        new Transform transform;
-
-        TextPopupParams _currPopupParams = TextPopupParams.BasicWhite;
-
-        IObjectPool<TextPopup> _objectPool;
-
-        void Awake()
-        {
-            transform = GetComponent<Transform>();
-            _textMesh = GetComponent<TextMeshPro>();
-
-            Vector3 startPos = transform.position + _currPopupParams.Offset;
-            _yPositionTweener = DOTween.To(() => startPos, x => transform.position = x + _currPopupParams.Offset,
-                 startPos + _currPopupParams.Distance, _currPopupParams.Duration)
+            Vector3 startPosition = _origin.position;
+            _lastStartPos = startPosition;
+            _yPositionTweener = DOTween.To(() => startPosition, x => transform.position = x,
+                 startPosition + _currPopupParams.Distance, _currPopupParams.Duration)
                  .SetAutoKill(false)
                  .Pause()
                  .SetEase(Ease.OutCubic);
@@ -47,7 +29,27 @@ namespace Darkan.RuntimeTools
                 .SetAutoKill(false)
                 .Pause()
                 .SetDelay(_currPopupParams.Duration - _currPopupParams.FadeTime)
-                .OnComplete(() => _objectPool.Release(this));
+                .OnComplete(() => _onComplete.Invoke());
+        }
+
+        static readonly Vector3 ROTATE_Y_180 = new(0, 180, 0);
+
+        TextMeshPro _textMesh;
+        Tweener _yPositionTweener;
+        Tweener _fadeInTweener;
+        Tweener _fadeOutTweener;
+        new Transform transform;
+        Transform _origin;
+        Vector3 _lastStartPos;
+
+        TextPopupParams _currPopupParams = TextPopupParams.BasicWhite;
+
+        Action _onComplete;
+
+        void Awake()
+        {
+            transform = GetComponent<Transform>();
+            _textMesh = GetComponent<TextMeshPro>();
         }
 
         void Update()
@@ -56,7 +58,7 @@ namespace Darkan.RuntimeTools
             transform.Rotate(ROTATE_Y_180);
         }
 
-        public void PlayPopup()
+        public void Play()
         {
             _yPositionTweener.Restart();
             _fadeOutTweener.Restart();
@@ -79,13 +81,14 @@ namespace Darkan.RuntimeTools
 
             if (_currPopupParams.Distance != popupParams.Distance
             || _currPopupParams.Duration != popupParams.Duration
-            || _currPopupParams.Offset != popupParams.Offset)
+            || _lastStartPos != _origin.position)
             {
-                Vector3 startPos = transform.position + popupParams.Offset;
+                Vector3 startPos = _origin.position;
                 _yPositionTweener.ChangeValues(startPos, startPos + popupParams.Distance, popupParams.Duration);
             }
 
             _currPopupParams = popupParams;
+            _lastStartPos = _origin.position;
         }
 
         void OnDestroy()

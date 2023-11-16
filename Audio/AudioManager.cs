@@ -1,8 +1,9 @@
 using Sirenix.OdinInspector;
+#if UNITY_EDITOR
 using Sirenix.OdinInspector.Editor;
+#endif
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace Darkan.Audio
 {
@@ -37,6 +38,7 @@ namespace Darkan.Audio
             }
         }
 
+#if UNITY_EDITOR
         //Used by Odin Inspector, and is called on collection changed
         void SetDefaultAudioFile(CollectionChangeInfo changeInfo)
         {
@@ -44,6 +46,7 @@ namespace Darkan.Audio
                 if (!_audioFiles[(string)changeInfo.Key].OldField)
                     _audioFiles[(string)changeInfo.Key] = AudioFile.Default;
         }
+#endif
 
         void CreateAudioSources()
         {
