@@ -7,9 +7,6 @@ namespace Darkan.Audio
     [Serializable]
     public struct AudioFile
     {
-        public bool UseAudioSourceInstead;
-        [ShowIf("UseAudioSourceInstead", Value = true)]
-        public AudioSource AudioSource;
         public AudioClip AudioClip;
         [Range(0f, 1f)]
         public float Volume;

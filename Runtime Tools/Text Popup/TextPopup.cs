@@ -85,6 +85,7 @@ namespace Darkan.RuntimeTools
             {
                 Vector3 startPos = _origin.position;
                 _yPositionTweener.ChangeValues(startPos, startPos + popupParams.Distance, popupParams.Duration);
+                _fadeOutTweener.SetDelay(popupParams.Duration - popupParams.FadeTime);
             }
 
             _currPopupParams = popupParams;
