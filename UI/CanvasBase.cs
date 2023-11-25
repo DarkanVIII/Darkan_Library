@@ -4,6 +4,7 @@ namespace Darkan.UI
     using UnityEngine;
     using UnityEngine.UIElements;
 
+    [ExecuteAlways]
     public abstract class CanvasBase : MonoBehaviour
     {
         [SerializeField] StyleSheet _styleSheet;
@@ -26,14 +27,14 @@ namespace Darkan.UI
             StartCoroutine(BuildCanvas());
         }
 
-        void OnValidate()
-        {
-            if (Application.isPlaying) return;
+        //void OnValidate()
+        //{
+        //    if (Application.isPlaying) return;
 
-            if (!_uiDocument.enabled) return;
+        //    if (!_uiDocument.enabled) return;
 
-            StartCoroutine(ResetRoot());
-        }
+        //    StartCoroutine(ResetRoot());
+        //}
 
         IEnumerator ResetRoot() //Used in Editor to Update Canvas, Waits for next frame because Root is null when leving playmode in Editor (Unity Bug)
         {
