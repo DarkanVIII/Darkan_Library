@@ -12,11 +12,6 @@ namespace Darkan.UI
         float _value;
         float _maxValue;
 
-        void Awake()
-        {
-            GetComponent<Canvas>().worldCamera = Camera.main;
-        }
-
         public void SetBar(float value, float maxValue)
         {
             _value = value;
