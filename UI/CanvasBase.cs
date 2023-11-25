@@ -52,14 +52,14 @@ namespace Darkan.UI
             return Create<VisualElement>(parent, className);
         }
 
-        protected T Create<T>(VisualElement parent, params string[] classes) where T : VisualElement, new()
+        protected T Create<T>(VisualElement parent, params string[] classNames) where T : VisualElement, new()
         {
             T element = new();
 
             if (parent != null)
                 parent.Add(element);
 
-            foreach (string className in classes)
+            foreach (string className in classNames)
             {
                 element.AddToClassList(className);
             }
@@ -67,11 +67,11 @@ namespace Darkan.UI
             return element;
         }
 
-        protected T Create<T>(params string[] classes) where T : VisualElement, new()
+        protected T Create<T>(params string[] classNames) where T : VisualElement, new()
         {
             T element = new();
 
-            foreach (string className in classes)
+            foreach (string className in classNames)
             {
                 element.AddToClassList(className);
             }
