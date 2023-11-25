@@ -10,7 +10,7 @@ namespace Darkan.UI
 
         protected VisualElement Root;
 
-        void Awake()
+        void Start()
         {
             Root = GetComponent<UIDocument>().rootVisualElement;
             Root.styleSheets.Add(_styleSheet);
@@ -27,6 +27,7 @@ namespace Darkan.UI
         IEnumerator ResetRoot() //Used in Editor to Update Canvas, Waits for next frame because Root is null when leving playmode in Editor (Unity Bug)
         {
             yield return null;
+
             Root = GetComponent<UIDocument>().rootVisualElement;
             Root.Clear();
             Root.styleSheets.Add(_styleSheet);
