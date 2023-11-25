@@ -13,5 +13,12 @@ namespace Darkan.UI
 
             return element;
         }
+
+        public static T AttachTo<T>(this T element, VisualElement parent) where T : VisualElement
+        {
+            parent.Add(element);
+
+            return element;
+        }
     }
 }
