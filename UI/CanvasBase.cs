@@ -9,23 +9,26 @@ namespace Darkan.UI
     {
         [SerializeField] StyleSheet _styleSheet;
 
-        protected UIDocument _uiDocument;
+        protected UIDocument UIDocument;
         protected VisualElement Root;
 
         void Awake()
         {
-            _uiDocument = GetComponent<UIDocument>();
+            UIDocument = GetComponent<UIDocument>();
         }
 
-        void OnEnable()
+        void Start()
         {
-            if (!_uiDocument.enabled) return;
-            if (Root != null) return;
+            bool uiWasDiasbled = UIDocument.enabled;
 
-            Root = _uiDocument.rootVisualElement;
+            UIDocument.enabled = true;
+
+            Root = UIDocument.rootVisualElement;
             Root.styleSheets.Add(_styleSheet);
 
             StartCoroutine(BuildCanvas());
+
+            UIDocument.enabled = uiWasDiasbled;
         }
 
         protected abstract IEnumerator BuildCanvas();
