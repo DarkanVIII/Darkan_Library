@@ -8,11 +8,19 @@ namespace Darkan.UI
     {
         [SerializeField] StyleSheet _styleSheet;
 
+        protected UIDocument _uiDocument;
         protected VisualElement Root;
 
-        void Start()
+        void Awake()
         {
-            Root = GetComponent<UIDocument>().rootVisualElement;
+            _uiDocument = GetComponent<UIDocument>();
+        }
+
+        void OnEnable()
+        {
+            if (Root != null) return;
+
+            Root = _uiDocument.rootVisualElement;
             Root.styleSheets.Add(_styleSheet);
 
             StartCoroutine(BuildCanvas());
@@ -21,6 +29,9 @@ namespace Darkan.UI
         void OnValidate()
         {
             if (Application.isPlaying) return;
+
+            if (!_uiDocument.enabled) return;
+
             StartCoroutine(ResetRoot());
         }
 
@@ -28,7 +39,7 @@ namespace Darkan.UI
         {
             yield return null;
 
-            Root = GetComponent<UIDocument>().rootVisualElement;
+            Root = _uiDocument.rootVisualElement;
             Root.Clear();
             Root.styleSheets.Add(_styleSheet);
 
