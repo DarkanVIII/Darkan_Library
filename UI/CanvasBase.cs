@@ -14,11 +14,9 @@ namespace Darkan.UI
         {
             Root = GetComponent<UIDocument>().rootVisualElement;
             Root.styleSheets.Add(_styleSheet);
-        }
 
-        void Start()
-        {
             StartCoroutine(Generate());
+
         }
 
         void OnValidate()
@@ -26,6 +24,7 @@ namespace Darkan.UI
             if (Application.isPlaying) return;
 
             Root.Clear();
+            Root.styleSheets.Add(_styleSheet);
 
             StartCoroutine(Generate());
         }
