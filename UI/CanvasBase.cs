@@ -35,5 +35,47 @@ namespace Darkan.UI
         }
 
         protected abstract IEnumerator BuildCanvas();
+
+        protected VisualElement Create(params string[] classNames)
+        {
+            return Create<VisualElement>(null, classNames);
+        }
+
+        protected VisualElement Create(VisualElement parent, params string[] classNames)
+        {
+            return Create<VisualElement>(parent, classNames);
+        }
+
+        protected VisualElement Create(string className, VisualElement parent = null)
+        {
+            return Create<VisualElement>(parent, className);
+        }
+
+        protected T Create<T>(VisualElement parent, params string[] classes) where T : VisualElement, new()
+        {
+            T element = new();
+
+            if (parent != null)
+                parent.Add(element);
+
+            foreach (string className in classes)
+            {
+                element.AddToClassList(className);
+            }
+
+            return element;
+        }
+
+        protected T Create<T>(params string[] classes) where T : VisualElement, new()
+        {
+            T element = new();
+
+            foreach (string className in classes)
+            {
+                element.AddToClassList(className);
+            }
+
+            return element;
+        }
     }
 }
