@@ -23,6 +23,7 @@ namespace Darkan.UI
         {
             if (Application.isPlaying) return;
 
+            Root = GetComponent<UIDocument>().rootVisualElement;
             Root.Clear();
             Root.styleSheets.Add(_styleSheet);
 
