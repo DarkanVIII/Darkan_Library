@@ -19,29 +19,10 @@ namespace Darkan.UI
 
         void OnEnable()
         {
+            if (!_uiDocument.enabled) return;
             if (Root != null) return;
 
             Root = _uiDocument.rootVisualElement;
-            Root.styleSheets.Add(_styleSheet);
-
-            StartCoroutine(BuildCanvas());
-        }
-
-        //void OnValidate()
-        //{
-        //    if (Application.isPlaying) return;
-
-        //    if (!_uiDocument.enabled) return;
-
-        //    StartCoroutine(ResetRoot());
-        //}
-
-        IEnumerator ResetRoot() //Used in Editor to Update Canvas, Waits for next frame because Root is null when leving playmode in Editor (Unity Bug)
-        {
-            yield return null;
-
-            Root = _uiDocument.rootVisualElement;
-            Root.Clear();
             Root.styleSheets.Add(_styleSheet);
 
             StartCoroutine(BuildCanvas());
