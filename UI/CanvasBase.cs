@@ -62,8 +62,6 @@ namespace Darkan.UI
             {
                 _root.Clear();
                 _root.styleSheets.Clear();
-                _root.ReleaseMouse();
-                _root.ReleasePointer(0);
             }
         }
 
