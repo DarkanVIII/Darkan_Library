@@ -13,7 +13,7 @@ namespace Darkan.UI
         protected UIDocument UIDocument;
         protected VisualElement Root;
 
-        [OnValueChanged("SetVisible")]
+        //[OnValueChanged("SetVisible")]
         [SerializeField]
         bool _visible = true;
         void SetVisible() => Visible = _visible;
@@ -22,6 +22,16 @@ namespace Darkan.UI
         {
             get => Root.visible;
             set => Root.visible = value;
+        }
+
+        void OnValidate()
+        {
+            UIDocument = GetComponent<UIDocument>();
+            Root = UIDocument.rootVisualElement;
+            Root.styleSheets.Add(_styleSheet);
+            StartCoroutine(BuildCanvas());
+
+            Visible = _visible;
         }
 
         void Awake()
