@@ -12,6 +12,18 @@ namespace Darkan.UI
         protected UIDocument UIDocument;
         protected VisualElement Root;
 
+        public bool Visible
+        {
+            get
+            {
+                return Root.visible;
+            }
+            set
+            {
+                Root.visible = value;
+            }
+        }
+
         void Awake()
         {
             UIDocument = GetComponent<UIDocument>();
