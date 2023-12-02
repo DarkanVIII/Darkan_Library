@@ -10,35 +10,30 @@ namespace Darkan.UI
     {
         [SerializeField] StyleSheet _styleSheet;
 
-        protected UIDocument UIDocument;
-        protected VisualElement Root;
+        UIDocument _uiDocument;
+        VisualElement _root;
 
-        //[OnValueChanged("SetVisible")]
+        [OnValueChanged("SetVisible")]
         [SerializeField]
         bool _visible = true;
         void SetVisible() => Visible = _visible;
 
         public bool Visible
         {
-            get => Root.visible;
-            set => Root.visible = value;
+            get => _root.visible;
+            set => _root.visible = value;
         }
 
-        void OnValidate()
-        {
-            UIDocument = GetComponent<UIDocument>();
-            Root = UIDocument.rootVisualElement;
-            Root.styleSheets.Add(_styleSheet);
-            StartCoroutine(BuildCanvas());
-
-            Visible = _visible;
-        }
+        public UIDocument UIDocument => _uiDocument;
+        public VisualElement Root => _root;
 
         void Awake()
         {
-            UIDocument = GetComponent<UIDocument>();
-            Root = UIDocument.rootVisualElement;
-            Root.styleSheets.Add(_styleSheet);
+            Debug.Log("Awake was called");
+
+            _uiDocument = GetComponent<UIDocument>();
+            _root = _uiDocument.rootVisualElement;
+            _root.styleSheets.Add(_styleSheet);
             StartCoroutine(BuildCanvas());
 
             Visible = _visible;
