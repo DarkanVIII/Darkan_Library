@@ -37,6 +37,9 @@ namespace Darkan.UI
 
         void OnEnable()
         {
+            if (_uiDocument != null)
+                _uiDocument.rootVisualElement.Clear();
+
             _uiDocument = GetComponent<UIDocument>();
             _root = _uiDocument.rootVisualElement;
 
@@ -46,12 +49,6 @@ namespace Darkan.UI
             StartCoroutine(BuildCanvas());
 
             Visible = _visible;
-        }
-
-        void OnDisable()
-        {
-            if (Application.isPlaying)
-                _uiDocument.rootVisualElement.Clear();
         }
 
         protected abstract IEnumerator BuildCanvas();
