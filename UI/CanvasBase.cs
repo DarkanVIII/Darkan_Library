@@ -1,16 +1,20 @@
 namespace Darkan.UI
 {
+    using Sirenix.OdinInspector;
     using System.Collections;
     using UnityEngine;
     using UnityEngine.UIElements;
 
     [ExecuteAlways]
-    public abstract class CanvasBase : MonoBehaviour
+    public abstract class CanvasBase : SerializedMonoBehaviour
     {
         [SerializeField] StyleSheet _styleSheet;
 
         protected UIDocument UIDocument;
         protected VisualElement Root;
+
+        [OnValueChanged("Visible")]
+        [SerializeField] bool _visible;
 
         public bool Visible
         {
@@ -30,6 +34,8 @@ namespace Darkan.UI
             Root = UIDocument.rootVisualElement;
             Root.styleSheets.Add(_styleSheet);
             StartCoroutine(BuildCanvas());
+
+            Visible = _visible;
         }
 
         protected abstract IEnumerator BuildCanvas();
