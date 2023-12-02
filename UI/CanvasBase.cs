@@ -43,7 +43,10 @@ namespace Darkan.UI
             _root = _uiDocument.rootVisualElement;
 
             if (_root != null)
+            {
                 _root.Clear();
+                _root.styleSheets.Clear();
+            }
 
             if (_styleSheet != null)
                 _root.styleSheets.Add(_styleSheet);
@@ -56,7 +59,10 @@ namespace Darkan.UI
         void OnDisable()
         {
             if (_root != null)
+            {
                 _root.Clear();
+                _root.styleSheets.Clear();
+            }
         }
 
         protected abstract IEnumerator BuildCanvas();
