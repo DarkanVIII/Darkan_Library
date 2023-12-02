@@ -21,22 +21,29 @@ namespace Darkan.UI
         public bool Visible
         {
             get => _root.visible;
-            set => _root.visible = value;
+            set
+            {
+                _root.visible = value;
+                _visible = value;
+            }
         }
 
         public UIDocument UIDocument => _uiDocument;
         public VisualElement Root => _root;
 
-        void Awake()
+        void OnEnable()
         {
-            Debug.Log("Awake was called");
-
             _uiDocument = GetComponent<UIDocument>();
             _root = _uiDocument.rootVisualElement;
             _root.styleSheets.Add(_styleSheet);
             StartCoroutine(BuildCanvas());
 
             Visible = _visible;
+        }
+
+        void OnDisable()
+        {
+            _root = null;
         }
 
         protected abstract IEnumerator BuildCanvas();
