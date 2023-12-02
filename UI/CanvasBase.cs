@@ -62,6 +62,7 @@ namespace Darkan.UI
             {
                 _root.Clear();
                 _root.styleSheets.Clear();
+                _root.SetEnabled(false);
             }
         }
 
