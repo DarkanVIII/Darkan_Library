@@ -15,20 +15,9 @@ namespace Darkan.UI
         void Awake()
         {
             UIDocument = GetComponent<UIDocument>();
-        }
-
-        void Start()
-        {
-            bool uiWasDiasbled = UIDocument.enabled;
-
-            UIDocument.enabled = true;
-
             Root = UIDocument.rootVisualElement;
             Root.styleSheets.Add(_styleSheet);
-
             StartCoroutine(BuildCanvas());
-
-            UIDocument.enabled = uiWasDiasbled;
         }
 
         protected abstract IEnumerator BuildCanvas();
