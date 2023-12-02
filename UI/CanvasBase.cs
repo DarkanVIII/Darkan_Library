@@ -8,13 +8,13 @@ namespace Darkan.UI
     [ExecuteAlways]
     public abstract class CanvasBase : SerializedMonoBehaviour
     {
+        [SerializeField] UIDocument _uiDocument;
+
         [OnValueChanged("SetStyleSheet")]
         [SerializeField]
         StyleSheet _styleSheet;
         void SetStyleSheet() => _root.styleSheets.Add(_styleSheet);
 
-
-        UIDocument _uiDocument;
         VisualElement _root;
 
         [OnValueChanged("SetVisible")]
@@ -37,11 +37,13 @@ namespace Darkan.UI
 
         void OnEnable()
         {
-            if (_uiDocument != null)
-                _uiDocument.rootVisualElement.Clear();
+            if (_uiDocument == null)
+                _uiDocument = GetComponent<UIDocument>();
 
-            _uiDocument = GetComponent<UIDocument>();
             _root = _uiDocument.rootVisualElement;
+
+            if (_root != null)
+                _root.Clear();
 
             if (_styleSheet != null)
                 _root.styleSheets.Add(_styleSheet);
@@ -49,6 +51,12 @@ namespace Darkan.UI
             StartCoroutine(BuildCanvas());
 
             Visible = _visible;
+        }
+
+        void OnDisable()
+        {
+            if (_root != null)
+                _root.Clear();
         }
 
         protected abstract IEnumerator BuildCanvas();
