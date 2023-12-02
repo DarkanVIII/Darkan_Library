@@ -43,7 +43,8 @@ namespace Darkan.UI
 
         void OnDisable()
         {
-            _uiDocument.rootVisualElement.Clear();
+            if (Application.isPlaying)
+                _uiDocument.rootVisualElement.Clear();
         }
 
         protected abstract IEnumerator BuildCanvas();
