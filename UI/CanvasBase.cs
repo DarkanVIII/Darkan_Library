@@ -15,17 +15,13 @@ namespace Darkan.UI
 
         [OnValueChanged("SetVisible")]
         [SerializeField]
-        bool _startVisible;
+        bool _visible = true;
+        void SetVisible() => Visible = _visible;
 
         public bool Visible
         {
             get => Root.visible;
             set => Root.visible = value;
-        }
-
-        void SetVisible()
-        {
-            Visible = _startVisible;
         }
 
         void Awake()
@@ -35,7 +31,7 @@ namespace Darkan.UI
             Root.styleSheets.Add(_styleSheet);
             StartCoroutine(BuildCanvas());
 
-            Visible = _startVisible;
+            Visible = _visible;
         }
 
         protected abstract IEnumerator BuildCanvas();
