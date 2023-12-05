@@ -36,9 +36,12 @@ namespace Darkan.StateMachine.Component
 
         protected virtual void Start()
         {
-            ActiveState = StatesDictionary[SetEntryState()];
+            TEnum entryState = SetEntryState();
+
+            ActiveState = StatesDictionary[entryState];
             ActiveState.EnterState();
             ActiveState.enabled = true;
+            OnStateChanged?.Invoke(entryState);
         }
 
         public abstract TEnum SetEntryState();
