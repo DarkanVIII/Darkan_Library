@@ -15,11 +15,6 @@ namespace Darkan.UI
         float _targetValue;
         bool _swapped;
 
-        void Awake()
-        {
-            GetComponent<Canvas>().worldCamera = Camera.main;
-        }
-
         void LateUpdate()
         {
             if (_targetValue == _fill.fillAmount) return;
