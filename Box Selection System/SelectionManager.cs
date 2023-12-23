@@ -2,7 +2,6 @@ namespace Darkan.Selection
 {
     using Darkan.RuntimeTools;
     using Sirenix.OdinInspector;
-    using System;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.InputSystem;
@@ -12,7 +11,7 @@ namespace Darkan.Selection
         #region Inspector
 
         enum RaycastOptions { Only2D, Only3D, Both }
-        enum CollisionCheckOptions { CollisionObject, RigidbodyObject, Both }
+        enum CollisionCheckOptions { ColliderObject, RigidbodyObject, Both }
 
         [SerializeField]
         RaycastOptions _raycastOptions = RaycastOptions.Both;
@@ -356,7 +355,7 @@ namespace Darkan.Selection
                 currHit++;
                 if (currHit > hits) break;
 
-                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.CollisionObject)
+                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.ColliderObject)
                 {
                     if (hit.collider.TryGetComponent(out ISelectable selector))
                     {
@@ -404,7 +403,7 @@ namespace Darkan.Selection
                 currHit++;
                 if (currHit > hits) break;
 
-                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.CollisionObject)
+                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.ColliderObject)
                 {
                     if (hit.collider.TryGetComponent(out ISelectable selector))
                     {
@@ -452,7 +451,7 @@ namespace Darkan.Selection
                 currHit++;
                 if (currHit > hits) break;
 
-                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.CollisionObject)
+                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.ColliderObject)
                 {
                     if (hit.collider.TryGetComponent(out IMarkable marker))
                     {
@@ -522,7 +521,7 @@ namespace Darkan.Selection
                 currHit++;
                 if (currHit > hits) break;
 
-                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.CollisionObject)
+                if (_collisionCheckOptions is CollisionCheckOptions.Both || _collisionCheckOptions is CollisionCheckOptions.ColliderObject)
                 {
                     if (hit.collider.TryGetComponent(out IMarkable marker))
                     {
