@@ -30,10 +30,6 @@ namespace Darkan.Selection
         [Tooltip("After collision, which objects to check for selection or marking. Using only 1 improves performance.")]
         CollisionCheckOptions _collisionCheckOptions = CollisionCheckOptions.Both;
 
-        [SerializeField]
-        [Tooltip("To remove allocation, set the max amount of hits that can be detected each cast. Only needed for 3D")]
-        int _maxHits3D = 100;
-
         #endregion
 
         #region Private Variables
@@ -49,21 +45,20 @@ namespace Darkan.Selection
 
         SpriteRenderer _boxRenderer;
         Transform _transform;
-        bool _isDragging;
-        private bool _buttonPressed;
+        bool _isBoxSelection;
+        bool _clicked;
         float _currDragTime;
 
-        RaycastHit[] _raycastHits3D;
-        readonly List<RaycastHit2D> _raycastHits2D = new();
-        readonly List<ISelectable> _activeSelection = new(32);
-        readonly List<IMarkable> _activeMarks = new(32);
+        RaycastHit[] _raycastHits3D = new RaycastHit[100];
+        readonly List<RaycastHit2D> _raycastHits2D = new(100);
+        readonly HashSet<ISelectable> _activeSelection = new(100);
+        readonly HashSet<IMarkable> _activeMarks = new(100);
 
-        // Needed to compare new hits with already marked objects
-        readonly List<IMarkable> _lastMarks = new(32);
-        readonly List<int> _activeMarksColliderID = new(32);
-        readonly List<int> _lastMarksColliderID = new(32);
+        // Needed to compare new IMarkables to already marked ones (So they can stay marked)
+        readonly HashSet<IMarkable> _lastMarks = new(100);
+        // Needed to compare new hits from Marking to already selected ones (Marking skips already selected targets)
+        readonly HashSet<int> _activeSelectionColliderIDS = new(100);
 
-        readonly Vector2 POINT_VECTOR = new(.01f, .01f);
         ContactFilter2D _contactFilter2D;
 
 #if UNITY_EDITOR // Used by Gizmos
@@ -94,31 +89,29 @@ namespace Darkan.Selection
         {
             _transform = GetComponent<Transform>();
             _boxRenderer = _transform.GetChild(0).GetComponent<SpriteRenderer>();
+        }
 
-            _raycastHits3D = new RaycastHit[_maxHits3D];
-
+        void Start()
+        {
             _contactFilter2D = new()
             {
                 useLayerMask = true,
                 useTriggers = true,
                 layerMask = _layersToCheck
             };
-        }
 
-        void Start()
-        {
             _lastCamPos = GameHelper.MainCamera.transform.position;
         }
 
         void Update()
         {
-            if (_buttonPressed)
+            if (_clicked)
             {
                 _currDragTime -= Time.deltaTime;
 
                 if (_currDragTime <= 0)
                 {
-                    _isDragging = true;
+                    _isBoxSelection = true;
                 }
             }
 
@@ -133,11 +126,11 @@ namespace Darkan.Selection
                 GetStartPositions();
 
                 _currDragTime = TIME_BEFORE_DRAG;
-                _buttonPressed = true;
+                _clicked = true;
                 _boxRenderer.enabled = true;
             }
 
-            if (_buttonPressed)
+            if (_clicked)
             {
                 GetEndPositions();
                 DrawBoxSprite();
@@ -145,13 +138,13 @@ namespace Darkan.Selection
 
             if (Mouse.current.leftButton.wasReleasedThisFrame)
             {
-                if (_isDragging)
+                if (_isBoxSelection)
                 {
                     ClearActiveMarks();
                     UpdateStartPoint();
                     CastSelectionBox();
 
-                    _isDragging = false;
+                    _isBoxSelection = false;
                     _boxRenderer.enabled = false;
                 }
                 else
@@ -159,7 +152,7 @@ namespace Darkan.Selection
                     SingleRaycast();
                 }
 
-                _buttonPressed = false;
+                _clicked = false;
             }
         }
 
@@ -167,53 +160,12 @@ namespace Darkan.Selection
         {
             if (!_useMarking) return;
 
-            if (_isDragging)
+            if (_isBoxSelection)
             {
                 UpdateStartPoint();
                 MoveActiveMarksToLastMarks();
                 CastMarkingBox();
                 ClearLastMarks();
-            }
-        }
-
-        void CastMarkingBox()
-        {
-            Vector3 boxCenter = (_startPointWorld + _endPointWorld) / 2;
-
-            Vector3 halfExtents;
-            halfExtents.x = Mathf.Abs(_endPointLocal.x - _startPointLocal.x) / 2;
-            halfExtents.y = Mathf.Abs(_endPointLocal.y - _startPointLocal.y) / 2;
-            halfExtents.z = Mathf.Abs(_endPointLocal.z - _startPointLocal.z) / 2;
-
-            Quaternion orientation = GameHelper.MainCamera.transform.rotation;
-
-            Vector3 direction = GameHelper.MainCamera.transform.forward;
-
-#if UNITY_EDITOR // Used by Gizmos
-
-            _wireBoxCenter = boxCenter;
-            _wireBoxExtents = halfExtents * 2;
-            _wireBoxRot = orientation;
-
-#endif
-
-            if (_raycastOptions is RaycastOptions.Both || _raycastOptions is RaycastOptions.Only3D)
-            {
-                int hits;
-
-                hits = Physics.BoxCastNonAlloc(boxCenter, halfExtents, direction, _raycastHits3D,
-                    orientation, Mathf.Infinity, _layersToCheck, QueryTriggerInteraction.Collide);
-
-                MarkAllHits3D(hits);
-            }
-
-            if (_raycastOptions is RaycastOptions.Both || _raycastOptions is RaycastOptions.Only2D)
-            {
-                int hits;
-
-                hits = Physics2D.BoxCast(boxCenter, halfExtents * 2, 0, Vector2.zero, _contactFilter2D, _raycastHits2D);
-
-                MarkAllHits2D(hits);
             }
         }
 
@@ -225,13 +177,6 @@ namespace Darkan.Selection
             }
 
             _activeMarks.Clear();
-
-            foreach (int id in _activeMarksColliderID)
-            {
-                _lastMarksColliderID.Add(id);
-            }
-
-            _activeMarksColliderID.Clear();
         }
 
         /// <summary>
@@ -264,6 +209,7 @@ namespace Darkan.Selection
             }
 
             _activeSelection.Clear();
+            _activeSelectionColliderIDS.Clear();
         }
 
         void ClearLastMarks()
@@ -274,7 +220,6 @@ namespace Darkan.Selection
             }
 
             _lastMarks.Clear();
-            _lastMarksColliderID.Clear();
         }
 
         void ClearActiveMarks()
@@ -285,7 +230,6 @@ namespace Darkan.Selection
             }
 
             _activeMarks.Clear();
-            _activeMarksColliderID.Clear();
         }
 
         void SingleRaycast()
@@ -306,6 +250,55 @@ namespace Darkan.Selection
                 int hits = Physics2D.Raycast(ray.origin, ray.direction, _contactFilter2D, _raycastHits2D);
 
                 SelectAllHits2D(hits);
+            }
+        }
+
+        void CastMarkingBox()
+        {
+            Vector3 boxCenter = (_startPointWorld + _endPointWorld) / 2;
+
+            Vector3 halfExtents;
+            halfExtents.x = Mathf.Abs(_endPointLocal.x - _startPointLocal.x) / 2;
+            halfExtents.y = Mathf.Abs(_endPointLocal.y - _startPointLocal.y) / 2;
+            halfExtents.z = Mathf.Abs(_endPointLocal.z - _startPointLocal.z) / 2;
+
+            Quaternion orientation = GameHelper.MainCamera.transform.rotation;
+
+            Vector3 direction = GameHelper.MainCamera.transform.forward;
+
+#if UNITY_EDITOR // Used by Gizmos
+
+            _wireBoxCenter = boxCenter;
+            _wireBoxExtents = halfExtents * 2;
+            _wireBoxRot = orientation;
+
+#endif
+
+            if (_raycastOptions is RaycastOptions.Both || _raycastOptions is RaycastOptions.Only3D)
+            {
+                int hits;
+
+                hits = Physics.BoxCastNonAlloc(boxCenter, halfExtents, direction, _raycastHits3D,
+                    orientation, Mathf.Infinity, _layersToCheck, QueryTriggerInteraction.Collide);
+
+                if (hits == _raycastHits3D.Length)
+                {
+                    _raycastHits3D = new RaycastHit[_raycastHits3D.Length + 50];
+                    Debug.Log(_raycastHits3D.Length);
+                    CastMarkingBox();
+                    return;
+                }
+
+                MarkAllHits3D(hits);
+            }
+
+            if (_raycastOptions is RaycastOptions.Both || _raycastOptions is RaycastOptions.Only2D)
+            {
+                int hits;
+
+                hits = Physics2D.BoxCast(boxCenter, halfExtents * 2, 0, Vector2.zero, _contactFilter2D, _raycastHits2D);
+
+                MarkAllHits2D(hits);
             }
         }
 
@@ -335,6 +328,13 @@ namespace Darkan.Selection
                 int hits = Physics.BoxCastNonAlloc(boxCenter, halfExtents, direction, _raycastHits3D,
                     orientation, Mathf.Infinity, _layersToCheck, QueryTriggerInteraction.Collide);
 
+                if (hits == _raycastHits3D.Length)
+                {
+                    _raycastHits3D = new RaycastHit[_raycastHits3D.Length + 50];
+                    CastSelectionBox();
+                    return;
+                }
+
                 SelectAllHits3D(hits);
             }
 
@@ -359,16 +359,21 @@ namespace Darkan.Selection
                 {
                     if (hit.collider.TryGetComponent(out ISelectable selector))
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) && _activeSelection.Contains(selector))
+                        if (_activeSelection.Contains(selector))
                         {
-                            selector.Deselect();
-                            _activeSelection.Remove(selector);
+                            if (!_isBoxSelection && Input.GetKey(KeyCode.LeftControl)) // If left control pressed and single selection -> remove target from selection
+                            {
+                                selector.Deselect();
+                                _activeSelection.Remove(selector);
+                                _activeSelectionColliderIDS.Remove(hit.colliderInstanceID);
+                                continue;
+                            }
+                            else continue;
                         }
-                        else
-                        {
-                            selector.Select();
-                            _activeSelection.Add(selector);
-                        }
+
+                        selector.Select();
+                        _activeSelection.Add(selector);
+                        _activeSelectionColliderIDS.Add(hit.colliderInstanceID);
                         continue;
                     }
                 }
@@ -379,16 +384,21 @@ namespace Darkan.Selection
 
                     if (hit.rigidbody.TryGetComponent(out ISelectable selector))
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) && _activeSelection.Contains(selector))
+                        if (_activeSelection.Contains(selector))
                         {
-                            selector.Deselect();
-                            _activeSelection.Remove(selector);
+                            if (!_isBoxSelection && Input.GetKey(KeyCode.LeftControl)) // If left control pressed and single selection -> remove target from selection
+                            {
+                                selector.Deselect();
+                                _activeSelection.Remove(selector);
+                                _activeSelectionColliderIDS.Remove(hit.colliderInstanceID);
+                                continue;
+                            }
+                            else continue;
                         }
-                        else
-                        {
-                            selector.Select();
-                            _activeSelection.Add(selector);
-                        }
+
+                        selector.Select();
+                        _activeSelection.Add(selector);
+                        _activeSelectionColliderIDS.Add(hit.colliderInstanceID);
                     }
                 }
             }
@@ -407,16 +417,21 @@ namespace Darkan.Selection
                 {
                     if (hit.collider.TryGetComponent(out ISelectable selector))
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) && _activeSelection.Contains(selector))
+                        if (_activeSelection.Contains(selector))
                         {
-                            selector.Deselect();
-                            _activeSelection.Remove(selector);
+                            if (!_isBoxSelection && Input.GetKey(KeyCode.LeftControl)) // If left control pressed and single selection -> remove target from selection
+                            {
+                                selector.Deselect();
+                                _activeSelection.Remove(selector);
+                                _activeSelectionColliderIDS.Remove(hit.collider.GetInstanceID());
+                                continue;
+                            }
+                            else continue;
                         }
-                        else
-                        {
-                            selector.Select();
-                            _activeSelection.Add(selector);
-                        }
+
+                        selector.Select();
+                        _activeSelection.Add(selector);
+                        _activeSelectionColliderIDS.Add(hit.collider.GetInstanceID());
                         continue;
                     }
                 }
@@ -427,16 +442,21 @@ namespace Darkan.Selection
 
                     if (hit.rigidbody.TryGetComponent(out ISelectable selector))
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) && _activeSelection.Contains(selector))
+                        if (_activeSelection.Contains(selector))
                         {
-                            selector.Deselect();
-                            _activeSelection.Remove(selector);
+                            if (!_isBoxSelection && Input.GetKey(KeyCode.LeftControl)) // If left control pressed and single selection -> remove target from selection
+                            {
+                                selector.Deselect();
+                                _activeSelection.Remove(selector);
+                                _activeSelectionColliderIDS.Remove(hit.collider.GetInstanceID());
+                                continue;
+                            }
+                            else continue;
                         }
-                        else
-                        {
-                            selector.Select();
-                            _activeSelection.Add(selector);
-                        }
+
+                        selector.Select();
+                        _activeSelection.Add(selector);
+                        _activeSelectionColliderIDS.Add(hit.collider.GetInstanceID());
                     }
                 }
             }
@@ -455,26 +475,18 @@ namespace Darkan.Selection
                 {
                     if (hit.collider.TryGetComponent(out IMarkable marker))
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) && _activeMarks.Contains(marker))
+                        if (_activeSelectionColliderIDS.Contains(hit.collider.GetInstanceID())) continue; // If target is already selected, skip
+
+                        if (_lastMarks.Contains(marker)) //If target was already marked, keep it marked
                         {
-                            marker.Unmark();
-                            _activeMarks.Remove(marker);
+                            _lastMarks.Remove(marker);
+
+                            _activeMarks.Add(marker);
                         }
                         else
                         {
-                            if (_lastMarksColliderID.Contains(hit.colliderInstanceID)) //If target was already marked, keep it marked
-                            {
-                                _lastMarks.Remove(marker);
-
-                                _activeMarks.Add(marker);
-                                _activeMarksColliderID.Add(hit.colliderInstanceID);
-                            }
-                            else
-                            {
-                                marker.Mark();
-                                _activeMarks.Add(marker);
-                                _activeMarksColliderID.Add(hit.colliderInstanceID);
-                            }
+                            marker.Mark();
+                            _activeMarks.Add(marker);
                         }
                         continue;
                     }
@@ -486,26 +498,18 @@ namespace Darkan.Selection
 
                     if (hit.rigidbody.TryGetComponent(out IMarkable marker))
                     {
-                        if (Input.GetKey(KeyCode.LeftControl) && _activeMarks.Contains(marker))
+                        if (_activeSelectionColliderIDS.Contains(hit.collider.GetInstanceID())) continue; // If target is already selected, skip
+
+                        if (_lastMarks.Contains(marker)) //If target was already marked, keep it marked
                         {
-                            marker.Unmark();
-                            _activeMarks.Remove(marker);
+                            _lastMarks.Remove(marker);
+
+                            _activeMarks.Add(marker);
                         }
                         else
                         {
-                            if (_lastMarksColliderID.Contains(hit.colliderInstanceID)) //If target was already marked, keep it marked
-                            {
-                                _lastMarks.Remove(marker);
-
-                                _activeMarks.Add(marker);
-                                _activeMarksColliderID.Add(hit.colliderInstanceID);
-                            }
-                            else
-                            {
-                                marker.Mark();
-                                _activeMarks.Add(marker);
-                                _activeMarksColliderID.Add(hit.colliderInstanceID);
-                            }
+                            marker.Mark();
+                            _activeMarks.Add(marker);
                         }
                     }
                 }
@@ -525,22 +529,19 @@ namespace Darkan.Selection
                 {
                     if (hit.collider.TryGetComponent(out IMarkable marker))
                     {
-                        int colliderID = hit.collider.GetInstanceID();
+                        if (_activeSelectionColliderIDS.Contains(hit.collider.GetInstanceID())) continue; // If target is already selected, skip
 
-                        if (_lastMarksColliderID.Contains(colliderID)) //If target was already marked, keep it marked
+                        if (_lastMarks.Contains(marker)) //If target was already marked, keep it marked
                         {
                             _lastMarks.Remove(marker);
 
                             _activeMarks.Add(marker);
-                            _activeMarksColliderID.Add(colliderID);
                         }
                         else
                         {
                             marker.Mark();
                             _activeMarks.Add(marker);
-                            _activeMarksColliderID.Add(colliderID);
                         }
-
                         continue;
                     }
                 }
@@ -551,20 +552,18 @@ namespace Darkan.Selection
 
                     if (hit.rigidbody.TryGetComponent(out IMarkable marker))
                     {
-                        int colliderID = hit.collider.GetInstanceID();
+                        if (_activeSelectionColliderIDS.Contains(hit.collider.GetInstanceID())) continue; // If target is already selected, skip
 
-                        if (_lastMarksColliderID.Contains(colliderID)) //If target was already marked, keep it marked
+                        if (_lastMarks.Contains(marker)) //If target was already marked, keep it marked
                         {
                             _lastMarks.Remove(marker);
 
                             _activeMarks.Add(marker);
-                            _activeMarksColliderID.Add(colliderID);
                         }
                         else
                         {
                             marker.Mark();
                             _activeMarks.Add(marker);
-                            _activeMarksColliderID.Add(colliderID);
                         }
                     }
                 }

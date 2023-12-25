@@ -135,7 +135,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 55
   _collisionCheckOptions: 2
-  _maxHits3D: 100
   _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _gizmoBoxes: 10
   _boxDistance: 5
