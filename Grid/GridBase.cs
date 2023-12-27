@@ -4,7 +4,7 @@ namespace Darkan.Grid
     using TMPro;
     using UnityEngine;
 
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer)), Searchable]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)), Searchable]
     public abstract class GridBase<T> : SerializedMonoBehaviour
     {
         enum Dimensions { XY, XZ }
@@ -128,12 +128,12 @@ namespace Darkan.Grid
                 {
                     case Dimensions.XY:
                         _textGrid[tileIndex.x, tileIndex.y] = CreateWorldText(debugText,
-                            GetWorldPositionByTileIndex(tileIndex) + new Vector3(_tileSize, _tileSize, 0) * 0.5f, tileIndex);
+                            GetLocalPositionByTileIndex(tileIndex) + new Vector3(_tileSize, _tileSize, 0) * 0.5f, tileIndex);
                         break;
 
                     case Dimensions.XZ:
                         _textGrid[tileIndex.x, tileIndex.y] = CreateWorldText(debugText,
-                            GetWorldPositionByTileIndex(tileIndex) + new Vector3(_tileSize, 0, _tileSize) * 0.5f, tileIndex);
+                            GetLocalPositionByTileIndex(tileIndex) + new Vector3(_tileSize, 0, _tileSize) * 0.5f, tileIndex);
                         break;
                 }
 
@@ -160,7 +160,7 @@ namespace Darkan.Grid
             {
                 for (currTileIndex.x = 0; currTileIndex.x < _grid.GetLength(0); currTileIndex.x++)
                 {
-                    Vector3 lowerLeftVertexPos = GetWorldPositionByTileIndex(currTileIndex);
+                    Vector3 lowerLeftVertexPos = GetLocalPositionByTileIndex(currTileIndex);
 
                     uvs[indexCurrVertex] = new(0, 0);
 
@@ -197,6 +197,8 @@ namespace Darkan.Grid
             _gridMesh.SetVertices(vertices);
             _gridMesh.SetUVs(0, uvs);
             _gridMesh.SetTriangles(triangles, 0);
+
+            GetComponent<MeshCollider>().sharedMesh = _gridMesh;
         }
 
         TextMeshPro CreateWorldText(string text, Vector3 worldPos, Vector2Int tileIndex)
@@ -227,7 +229,7 @@ namespace Darkan.Grid
             return textMesh;
         }
 
-        public Vector3 GetWorldPositionByTileIndex(Vector2Int tileIndex, bool middleOfTile = false)
+        Vector3 GetLocalPositionByTileIndex(Vector2Int tileIndex)
         {
             Vector3 worldPos = Vector3.zero;
 
@@ -235,22 +237,39 @@ namespace Darkan.Grid
             {
                 case Dimensions.XY:
                     worldPos = new Vector3(tileIndex.x, tileIndex.y, 0) * _tileSize + _origin;
-                    if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, _tileSize * .5f);
                     break;
 
                 case Dimensions.XZ:
                     worldPos = new Vector3(tileIndex.x, 0, tileIndex.y) * _tileSize + _origin;
+                    break;
+            }
+            return worldPos;
+        }
+
+        public Vector3 GetWorldPositionByTileIndex(Vector2Int tileIndex, bool middleOfTile = false)
+        {
+            Vector3 worldPos = Vector3.zero;
+
+            switch (_dimensions)
+            {
+                case Dimensions.XY:
+                    worldPos = new Vector3(tileIndex.x, tileIndex.y, 0) * _tileSize + _origin + transform.position;
+                    if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, _tileSize * .5f);
+                    break;
+
+                case Dimensions.XZ:
+                    worldPos = new Vector3(tileIndex.x, 0, tileIndex.y) * _tileSize + _origin + transform.position;
                     if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, 0, _tileSize * .5f);
                     break;
             }
             return worldPos;
         }
 
-        bool TryGetTileIndex(Vector3 worldPos, out Vector2Int tileIndex)
+        public bool TryGetTileIndex(Vector3 worldPos, out Vector2Int tileIndex)
         {
             tileIndex = default;
 
-            tileIndex.x = Mathf.FloorToInt((worldPos.x - _origin.x) / _tileSize);
+            tileIndex.x = Mathf.FloorToInt((worldPos.x - _origin.x - transform.position.x) / _tileSize);
 
             if (tileIndex.x < 0 || tileIndex.x >= _gridSize.x)
             {
@@ -261,11 +280,11 @@ namespace Darkan.Grid
             switch (_dimensions)
             {
                 case Dimensions.XY:
-                    tileIndex.y = Mathf.FloorToInt((worldPos.y - _origin.y) / _tileSize);
+                    tileIndex.y = Mathf.FloorToInt((worldPos.y - _origin.y - transform.position.y) / _tileSize);
                     break;
 
                 case Dimensions.XZ:
-                    tileIndex.y = Mathf.FloorToInt((worldPos.z - _origin.z) / _tileSize);
+                    tileIndex.y = Mathf.FloorToInt((worldPos.z - _origin.z - transform.position.z) / _tileSize);
                     break;
             }
 
@@ -290,7 +309,7 @@ namespace Darkan.Grid
 #endif
         }
 
-        public void SetTileObject(Vector2 worldPosition, T value)
+        public void SetTileObject(Vector3 worldPosition, T value)
         {
             if (TryGetTileIndex(worldPosition, out Vector2Int tileIndex))
                 SetTileObject(tileIndex, value);
