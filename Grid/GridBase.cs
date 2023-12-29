@@ -246,9 +246,14 @@ namespace Darkan.Grid
             return worldPos;
         }
 
-        public Vector3 GetWorldPositionByTileIndex(Vector2Int tileIndex, bool middleOfTile = false)
+        public bool TryGetWorldPositionByTileIndex(Vector2Int tileIndex, out Vector3 worldPos, bool middleOfTile = false)
         {
-            Vector3 worldPos = Vector3.zero;
+            worldPos = default;
+
+            if (tileIndex.x < 0 || tileIndex.y < 0)
+                return false;
+            if (tileIndex.x >= _grid.GetLength(0) || tileIndex.y >= _grid.GetLength(1))
+                return false;
 
             switch (_dimensions)
             {
@@ -256,13 +261,13 @@ namespace Darkan.Grid
                     worldPos = new Vector3(tileIndex.x, tileIndex.y, 0) * _tileSize + _origin + transform.position;
                     if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, _tileSize * .5f);
                     break;
-
                 case Dimensions.XZ:
                     worldPos = new Vector3(tileIndex.x, 0, tileIndex.y) * _tileSize + _origin + transform.position;
                     if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, 0, _tileSize * .5f);
                     break;
             }
-            return worldPos;
+
+            return true;
         }
 
         public bool TryGetTileIndex(Vector3 worldPos, out Vector2Int tileIndex)
