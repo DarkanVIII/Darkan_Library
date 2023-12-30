@@ -163,6 +163,16 @@ namespace Darkan.Grid
         }
 #endif
 
+        public bool Contains(Vector2Int tileIndex)
+        {
+            if (tileIndex.x < 0 || tileIndex.y < 0)
+                return false;
+            if (tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
+                return false;
+
+            return true;
+        }
+
         void BuildAndRenderGridMesh()
         {
             if (_gridMesh != null)
@@ -273,9 +283,7 @@ namespace Darkan.Grid
         {
             worldPos = default;
 
-            if (tileIndex.x < 0 || tileIndex.y < 0)
-                return false;
-            if (tileIndex.x >= _grid.GetLength(0) || tileIndex.y >= _grid.GetLength(1))
+            if (!Contains(tileIndex))
                 return false;
 
             switch (_dimensions)
