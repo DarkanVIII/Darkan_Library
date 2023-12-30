@@ -63,13 +63,13 @@ namespace Darkan.Grid
 
         protected virtual void UpdateTileValue(T tile, TextMeshPro textMesh)
         {
-            if (_debugTiles is DebugTiles.ShowValues)
-                textMesh.text = tile.ToString();
+            textMesh.text = tile.ToString();
         }
 
         public void UpdateTileValue(Vector2Int tileIndex)
         {
-            UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
+            if (_debugTiles is DebugTiles.ShowValues)
+                UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
         }
 
         protected abstract void TileSetup(T tile, Vector2Int tileIndex);
