@@ -66,6 +66,8 @@ namespace Darkan.Grid
             UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
         }
 
+        protected abstract void TileSetup(T tile, Vector2Int tileIndex);
+
         [Button("Rebuild Grid")]
         void BuildGrid()
         {
