@@ -23,6 +23,10 @@ namespace Darkan.Grid
         [SerializeField]
         Vector3 _origin;
 
+        public Vector2Int GridSize => _gridSize;
+        public float TileSize => _tileSize;
+        public Vector3 Origin => _origin;
+
 #if UNITY_EDITOR
         [Title("Debug")]
         enum DebugTiles { Disabled, ShowValues, ShowIndices }
@@ -56,9 +60,11 @@ namespace Darkan.Grid
         }
 
         protected abstract T SetInitialValue();
+
         protected virtual void UpdateTileValue(T tile, TextMeshPro textMesh)
         {
-            textMesh.text = tile.ToString();
+            if (_debugTiles is DebugTiles.ShowValues)
+                textMesh.text = tile.ToString();
         }
 
         public void UpdateTileValue(Vector2Int tileIndex)
