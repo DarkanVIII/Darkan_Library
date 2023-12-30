@@ -55,7 +55,16 @@ namespace Darkan.Grid
             BuildGrid();
         }
 
-        public abstract T SetInitialValue();
+        protected abstract T SetInitialValue();
+        protected virtual void UpdateTileValue(T tile, TextMeshPro textMesh)
+        {
+            textMesh.text = tile.ToString();
+        }
+
+        public void UpdateTileValue(Vector2Int tileIndex)
+        {
+            UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
+        }
 
         [Button("Rebuild Grid")]
         void BuildGrid()
@@ -104,7 +113,7 @@ namespace Darkan.Grid
 
             Vector2Int tileIndex = Vector2Int.zero;
 
-            foreach (T value in _grid)
+            foreach (T tile in _grid)
             {
                 if (tileIndex.y == _gridSize.y)
                 {
@@ -117,7 +126,7 @@ namespace Darkan.Grid
                 switch (_debugTiles)
                 {
                     case DebugTiles.ShowValues:
-                        debugText = value.ToString();
+                        debugText = tile.ToString();
                         break;
                     case DebugTiles.ShowIndices:
                         debugText = $"{tileIndex.x},{tileIndex.y}";
@@ -301,47 +310,48 @@ namespace Darkan.Grid
             return true;
         }
 
-        public void SetTileObject(Vector2Int tileIndex, T value)
+        public void SetTileObject(Vector2Int tileIndex, T tile)
         {
             if (tileIndex.x < 0 || tileIndex.x > _gridSize.x - 1) return;
             if (tileIndex.y < 0 || tileIndex.y > _gridSize.y - 1) return;
 
-            _grid[tileIndex.x, tileIndex.y] = value;
+            _grid[tileIndex.x, tileIndex.y] = tile;
 
 #if UNITY_EDITOR
             if (_debugTiles == DebugTiles.ShowValues)
-                _textGrid[tileIndex.x, tileIndex.y].text = value.ToString();
+                _textGrid[tileIndex.x, tileIndex.y].text = tile.ToString();
+            UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
 #endif
         }
 
-        public void SetTileObject(Vector3 worldPosition, T value)
+        public void SetTileObject(Vector3 worldPosition, T tile)
         {
             if (TryGetTileIndex(worldPosition, out Vector2Int tileIndex))
-                SetTileObject(tileIndex, value);
+                SetTileObject(tileIndex, tile);
         }
 
-        public bool TryGetTileObject(Vector2Int tileIndex, out T value)
+        public bool TryGetTileObject(Vector2Int tileIndex, out T tile)
         {
             if (tileIndex.x < 0 || tileIndex.y < 0 || tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
             {
-                value = default;
+                tile = default;
                 return false;
             }
 
-            value = _grid[tileIndex.x, tileIndex.y];
+            tile = _grid[tileIndex.x, tileIndex.y];
             return true;
         }
 
-        public bool TryGetTileObject(Vector3 worldPos, out T value)
+        public bool TryGetTileObject(Vector3 worldPos, out T tile)
         {
             if (TryGetTileIndex(worldPos, out Vector2Int tileIndex))
             {
-                value = _grid[tileIndex.x, tileIndex.y];
+                tile = _grid[tileIndex.x, tileIndex.y];
                 return true;
             }
             else
             {
-                value = default;
+                tile = default;
                 return false;
             }
         }
