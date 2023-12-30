@@ -61,6 +61,7 @@ namespace Darkan.Grid
 
         protected abstract T SetInitialValue();
 
+#if UNITY_EDITOR
         protected virtual void UpdateTileValue(T tile, TextMeshPro textMesh)
         {
             textMesh.text = tile.ToString();
@@ -71,6 +72,7 @@ namespace Darkan.Grid
             if (_debugTiles is DebugTiles.ShowValues)
                 UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
         }
+#endif
 
         protected abstract void TileSetup(T tile, Vector2Int tileIndex);
 
@@ -220,6 +222,7 @@ namespace Darkan.Grid
             GetComponent<MeshCollider>().sharedMesh = _gridMesh;
         }
 
+#if UNITY_EDITOR
         TextMeshPro CreateWorldText(string text, Vector3 worldPos, Vector2Int tileIndex)
         {
             GameObject go;
@@ -247,6 +250,7 @@ namespace Darkan.Grid
             textMesh.fontSize = 4;
             return textMesh;
         }
+#endif  
 
         Vector3 GetLocalPositionByTileIndex(Vector2Int tileIndex)
         {
