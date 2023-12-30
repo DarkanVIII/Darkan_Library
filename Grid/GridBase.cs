@@ -82,7 +82,9 @@ namespace Darkan.Grid
             {
                 for (int x = 0; x < _grid.GetLength(0); x++)
                 {
-                    _grid[x, y] = SetInitialValue();
+                    T tile = SetInitialValue();
+                    _grid[x, y] = tile;
+                    TileSetup(tile, new Vector2Int(x, y));
                 }
             }
 
