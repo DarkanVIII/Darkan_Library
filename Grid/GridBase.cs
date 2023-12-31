@@ -163,11 +163,9 @@ namespace Darkan.Grid
         }
 #endif
 
-        public bool Contains(Vector2Int tileIndex)
+        public bool InBounds(Vector2Int tileIndex)
         {
-            if (tileIndex.x < 0 || tileIndex.y < 0)
-                return false;
-            if (tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
+            if (tileIndex.x < 0 || tileIndex.y < 0 || tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
                 return false;
 
             return true;
@@ -283,7 +281,7 @@ namespace Darkan.Grid
         {
             worldPos = default;
 
-            if (!Contains(tileIndex))
+            if (!InBounds(tileIndex))
                 return false;
 
             switch (_dimensions)
@@ -334,15 +332,13 @@ namespace Darkan.Grid
 
         public void SetTileObject(Vector2Int tileIndex, T tile)
         {
-            if (tileIndex.x < 0 || tileIndex.x > _gridSize.x - 1) return;
-            if (tileIndex.y < 0 || tileIndex.y > _gridSize.y - 1) return;
+            if (!InBounds(tileIndex)) return;
 
             _grid[tileIndex.x, tileIndex.y] = tile;
 
 #if UNITY_EDITOR
             if (_debugTiles == DebugTiles.ShowValues)
-                _textGrid[tileIndex.x, tileIndex.y].text = tile.ToString();
-            UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
+                UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
 #endif
         }
 
