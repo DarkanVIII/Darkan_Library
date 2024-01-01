@@ -25,14 +25,28 @@ namespace Darkan.Pooling
 
         public int CountInactive => _stack.Count;
 
-        public ObjectPooler(Func<T> createFunc, Action<T> actionOnGet = null, Action<T> actionOnRelease = null, Action<T> actionOnDestroy = null, ushort defaultCapacity = 25)
+        public ObjectPooler(Func<T> createFunc, Action<T> actionOnRelease, Action<T> actionOnGet = null, Action<T> actionOnDestroy = null,
+            ushort prefillAmount = 10, ushort defaultCapacity = 25)
         {
             _stack = new Stack<T>(defaultCapacity);
 
             _createFunc = createFunc ?? throw new ArgumentNullException("createFunc");
+            _actionOnRelease = actionOnRelease ?? throw new ArgumentNullException("releaseAction");
             _actionOnGet = actionOnGet;
-            _actionOnRelease = actionOnRelease;
             _actionOnDestroy = actionOnDestroy;
+
+            PrefillPool(prefillAmount);
+        }
+
+        void PrefillPool(ushort amount)
+        {
+            for (int i = 1; i <= amount; i++)
+            {
+                T obj = _createFunc();
+                _actionOnRelease?.Invoke(obj);
+                _stack.Push(obj);
+                CountAll++;
+            }
         }
 
         public T Get()
