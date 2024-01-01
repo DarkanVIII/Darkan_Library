@@ -1,6 +1,7 @@
 namespace Darkan.Grid
 {
     using Sirenix.OdinInspector;
+    using System.Runtime.CompilerServices;
     using TMPro;
     using UnityEngine;
 
@@ -163,6 +164,7 @@ namespace Darkan.Grid
         }
 #endif
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool InBounds(Vector2Int tileIndex)
         {
             if (tileIndex.x < 0 || tileIndex.y < 0 || tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
@@ -348,9 +350,9 @@ namespace Darkan.Grid
                 SetTileObject(tileIndex, tile);
         }
 
-        public bool TryGetTileObject(Vector2Int tileIndex, out T tile)
+        public bool TryGetTile(Vector2Int tileIndex, out T tile)
         {
-            if (tileIndex.x < 0 || tileIndex.y < 0 || tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
+            if (!InBounds(tileIndex))
             {
                 tile = default;
                 return false;
@@ -360,7 +362,7 @@ namespace Darkan.Grid
             return true;
         }
 
-        public bool TryGetTileObject(Vector3 worldPos, out T tile)
+        public bool TryGetTile(Vector3 worldPos, out T tile)
         {
             if (TryGetTileIndex(worldPos, out Vector2Int tileIndex))
             {
