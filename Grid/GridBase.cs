@@ -25,6 +25,8 @@ namespace Darkan.Grid
         [SerializeField]
         Vector3 _origin;
 
+        protected LayerMask GridLayer;
+
         public Vector2Int GridSize => _gridSize;
         public float TileSize => _tileSize;
         public Vector3 Origin => _origin;
@@ -53,6 +55,7 @@ namespace Darkan.Grid
 
         protected virtual void Awake()
         {
+            GridLayer = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
             _gridMesh = GetComponent<MeshFilter>().mesh;
         }
 
@@ -395,7 +398,7 @@ namespace Darkan.Grid
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, gameObject.layer))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, GridLayer))
             {
                 mousePos = hit.point;
                 return true;
