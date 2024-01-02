@@ -6,6 +6,7 @@ namespace Darkan.Grid
     using UnityEngine;
 
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)), Searchable]
+    [InfoBox("It is recommended to put this GameObject on it's own layer (for raycasts)")]
     public abstract class GridBase<T> : SerializedMonoBehaviour
     {
         enum Dimensions { XY, XZ }
@@ -372,6 +373,36 @@ namespace Darkan.Grid
             else
             {
                 tile = default;
+                return false;
+            }
+        }
+
+        public bool TryGetTileIndexByMousePosition(out Vector2Int tileIndex)
+        {
+            if (RaycastMousePositionOnGrid(out Vector3 mousePos))
+            {
+                if (TryGetTileIndex(mousePos, out Vector2Int tileObjIndex))
+                {
+                    tileIndex = tileObjIndex;
+                    return true;
+                }
+            }
+            tileIndex = Vector2Int.zero;
+            return false;
+        }
+
+        bool RaycastMousePositionOnGrid(out Vector3 mousePos)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, gameObject.layer))
+            {
+                mousePos = hit.point;
+                return true;
+            }
+            else
+            {
+                mousePos = Vector3.zero;
                 return false;
             }
         }
