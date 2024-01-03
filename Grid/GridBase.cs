@@ -1,5 +1,6 @@
 namespace Darkan.Grid
 {
+    using Darkan.RuntimeTools;
     using Sirenix.OdinInspector;
     using System.Runtime.CompilerServices;
     using TMPro;
@@ -396,7 +397,7 @@ namespace Darkan.Grid
 
         bool RaycastMousePositionOnGrid(out Vector3 mousePos)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = GameHelper.MainCamera.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, GridLayer))
             {
