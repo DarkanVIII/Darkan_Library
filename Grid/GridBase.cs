@@ -6,8 +6,10 @@ namespace Darkan.Grid
     using TMPro;
     using UnityEngine;
 
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)), Searchable]
-    [InfoBox("It is recommended to put this GameObject on it's own layer (for raycasts)")]
+    [ExecuteAlways]
+    [Searchable]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
+    [InfoBox("Put this GameObject on a separate grid layer (for raycasts)")]
     public abstract class GridBase<T> : SerializedMonoBehaviour
     {
         enum Dimensions { XY, XZ }
@@ -15,80 +17,90 @@ namespace Darkan.Grid
         [Title("Grid Setup")]
 
         [SerializeField, EnumToggleButtons]
+        [OnValueChanged("UpdateGridInEditor")]
         Dimensions _dimensions = Dimensions.XY;
 
         [SerializeField]
+        [OnValueChanged("UpdateGridInEditor")]
         Vector2Int _gridSize;
 
         [SerializeField]
-        float _tileSize;
+        [OnValueChanged("UpdateGridInEditor")]
+        float _cellSize;
 
         [SerializeField]
+        [OnValueChanged("UpdateGridInEditor")]
         Vector3 _origin;
+
+        [Title("Debug")]
+        enum DebugCells { Disabled, ShowValues, ShowIndices }
+
+        [SerializeField, EnumToggleButtons]
+        [OnValueChanged("UpdateGridInEditor")]
+        DebugCells _debugCells = DebugCells.Disabled;
+
+        [SerializeField, AssetsOnly]
+        [LabelText("Text Prefab (optional)")]
+        [HideIf("DebugCellsAreDisabled")]
+        [OnValueChanged("UpdateGridInEditor")]
+        TextMeshPro _textPrefab;
+
+        bool DebugCellsAreDisabled => _debugCells is DebugCells.Disabled;
 
         protected LayerMask GridLayer;
 
         public Vector2Int GridSize => _gridSize;
-        public float TileSize => _tileSize;
+        public float CellSize => _cellSize;
         public Vector3 Origin => _origin;
 
-#if UNITY_EDITOR
-        [Title("Debug")]
-        enum DebugTiles { Disabled, ShowValues, ShowIndices }
-
-        [SerializeField, EnumToggleButtons]
-        DebugTiles _debugTiles = DebugTiles.Disabled;
-
-        [SerializeField, AssetsOnly]
-        [LabelText("Text Prefab (optional)")]
-        [HideIf("DebugTilesAreDisabled")]
-        TextMeshPro _textPrefab;
-
-        bool DebugTilesAreDisabled => _debugTiles is DebugTiles.Disabled;
-
         TextMeshPro[,] _textGrid;
-#endif
+
         [ShowInInspector, ReadOnly]
         [InlineEditor(InlineEditorObjectFieldModes.Boxed, DrawPreview = true, PreviewAlignment = PreviewAlignment.Bottom, PreviewHeight = 150, Expanded = false)]
         Mesh _gridMesh;
+        Transform _transform;
 
         T[,] _grid;
 
         protected virtual void Awake()
         {
+            _transform = GetComponent<Transform>();
             GridLayer = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
-            _gridMesh = GetComponent<MeshFilter>().mesh;
+            _gridMesh = GetComponent<MeshFilter>().sharedMesh;
+
+            BuildGrid();
+
+            GetComponent<MeshCollider>().sharedMesh = _gridMesh;
         }
 
-        protected virtual void Start()
+        // Used by Odin Inspector to update the grid on inspector values changed
+        void UpdateGridInEditor()
         {
             BuildGrid();
         }
 
-        protected abstract T SetInitialValue();
+        protected abstract T SetInitialCellValue();
 
-#if UNITY_EDITOR
-        protected virtual void UpdateTileValue(T tile, TextMeshPro textMesh)
+        protected virtual void UpdateCellValue(T cell, TextMeshPro textMesh)
         {
-            textMesh.text = tile.ToString();
+            textMesh.text = cell.ToString();
         }
 
-        public void UpdateTileValue(Vector2Int tileIndex)
+        public void UpdateCellValue(Vector2Int tileIndex)
         {
-            if (_debugTiles is DebugTiles.ShowValues)
-                UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
+            if (_debugCells is DebugCells.ShowValues)
+                UpdateCellValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
         }
-#endif
 
-        protected abstract void TileSetup(T tile, Vector2Int tileIndex);
+        /// <summary>
+        /// Called on each cell when the grid is built. Use this to set up the cell.
+        /// </summary>
+        protected abstract void CellSetup(T cell, Vector2Int cellIndex);
 
-        [Button("Rebuild Grid")]
         void BuildGrid()
         {
-            if (!Application.isPlaying) return;
-
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
-            if (_tileSize <= 0) return;
+            if (_cellSize <= 0) return;
 
             _grid = new T[_gridSize.x, _gridSize.y];
 
@@ -96,92 +108,93 @@ namespace Darkan.Grid
             {
                 for (int x = 0; x < _grid.GetLength(0); x++)
                 {
-                    T tile = SetInitialValue();
+                    T tile = SetInitialCellValue();
                     _grid[x, y] = tile;
-                    TileSetup(tile, new Vector2Int(x, y));
+                    CellSetup(tile, new Vector2Int(x, y));
                 }
             }
 
-            BuildAndRenderGridMesh();
+            BuildGridMesh();
 
-#if UNITY_EDITOR
-            CreateDebugTileText();
-#endif
+            CreateDebugCellText();
         }
 
-#if UNITY_EDITOR // For Debugging Tile values or indices in the Editor
-        void CreateDebugTileText()
+        void CreateDebugCellText()
         {
             if (_textGrid != null)
             {
                 foreach (var txtMesh in _textGrid)
                 {
                     if (txtMesh != null)
-                        Destroy(txtMesh.gameObject);
+                    {
+                        if (Application.isPlaying)
+                            Destroy(txtMesh.gameObject);
+                        else
+                            DestroyImmediate(txtMesh.gameObject);
+                    }
                 }
             }
 
-            if (_debugTiles is DebugTiles.Disabled)
-            {
-                _textGrid = null;
-                return;
-            }
+            if (_debugCells is DebugCells.Disabled) return;
 
             _textGrid = new TextMeshPro[_gridSize.x, _gridSize.y];
 
-            Vector2Int tileIndex = Vector2Int.zero;
+            Vector2Int cellIndex = Vector2Int.zero;
 
-            foreach (T tile in _grid)
+            foreach (T cell in _grid)
             {
-                if (tileIndex.y == _gridSize.y)
+                if (cellIndex.y == _gridSize.y)
                 {
-                    tileIndex.y = 0;
-                    tileIndex.x++;
+                    cellIndex.y = 0;
+                    cellIndex.x++;
                 }
 
                 string debugText = string.Empty;
 
-                switch (_debugTiles)
+                switch (_debugCells)
                 {
-                    case DebugTiles.ShowValues:
-                        debugText = tile.ToString();
+                    case DebugCells.ShowValues:
+                        debugText = cell.ToString();
                         break;
-                    case DebugTiles.ShowIndices:
-                        debugText = $"{tileIndex.x},{tileIndex.y}";
+                    case DebugCells.ShowIndices:
+                        debugText = $"{cellIndex.x},{cellIndex.y}";
                         break;
                 }
 
                 switch (_dimensions)
                 {
                     case Dimensions.XY:
-                        _textGrid[tileIndex.x, tileIndex.y] = CreateWorldText(debugText,
-                            GetLocalPositionByTileIndex(tileIndex) + new Vector3(_tileSize, _tileSize, 0) * 0.5f, tileIndex);
+                        _textGrid[cellIndex.x, cellIndex.y] = CreateWorldText(debugText,
+                            GetLocalPositionByCellIndex(cellIndex) + new Vector3(_cellSize, _cellSize, 0) * 0.5f, cellIndex);
                         break;
 
                     case Dimensions.XZ:
-                        _textGrid[tileIndex.x, tileIndex.y] = CreateWorldText(debugText,
-                            GetLocalPositionByTileIndex(tileIndex) + new Vector3(_tileSize, 0, _tileSize) * 0.5f, tileIndex);
+                        _textGrid[cellIndex.x, cellIndex.y] = CreateWorldText(debugText,
+                            GetLocalPositionByCellIndex(cellIndex) + new Vector3(_cellSize, 0, _cellSize) * 0.5f, cellIndex);
                         break;
                 }
 
-                tileIndex.y++;
+                cellIndex.y++;
             }
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool InBounds(Vector2Int tileIndex)
+        public bool InBounds(Vector2Int cellIndex)
         {
-            if (tileIndex.x < 0 || tileIndex.y < 0 || tileIndex.x >= _gridSize.x || tileIndex.y >= _gridSize.y)
+            if (cellIndex.x < 0 || cellIndex.y < 0 || cellIndex.x >= _gridSize.x || cellIndex.y >= _gridSize.y)
                 return false;
 
             return true;
         }
 
-        void BuildAndRenderGridMesh()
+        void BuildGridMesh()
         {
             if (_gridMesh != null)
                 _gridMesh.Clear();
+            else
+            {
+                _gridMesh = new();
+            }
 
             Vector3[] vertices = new Vector3[4 * _grid.Length];
             Vector2[] uvs = new Vector2[vertices.Length];
@@ -196,7 +209,7 @@ namespace Darkan.Grid
             {
                 for (currTileIndex.x = 0; currTileIndex.x < _grid.GetLength(0); currTileIndex.x++)
                 {
-                    Vector3 lowerLeftVertexPos = GetLocalPositionByTileIndex(currTileIndex);
+                    Vector3 lowerLeftVertexPos = GetLocalPositionByCellIndex(currTileIndex);
 
                     uvs[indexCurrVertex] = new(0, 0);
 
@@ -216,17 +229,17 @@ namespace Darkan.Grid
                     switch (_dimensions)
                     {
                         case Dimensions.XY:
-                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(0, _tileSize, 0);
-                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(_tileSize, _tileSize, 0);
+                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(0, _cellSize, 0);
+                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(_cellSize, _cellSize, 0);
                             break;
 
                         case Dimensions.XZ:
-                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(0, 0, _tileSize);
-                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(_tileSize, 0, _tileSize);
+                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(0, 0, _cellSize);
+                            vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(_cellSize, 0, _cellSize);
                             break;
                     }
 
-                    vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(_tileSize, 0, 0);
+                    vertices[indexCurrVertex++] = lowerLeftVertexPos + new Vector3(_cellSize, 0, 0);
                 }
             }
 
@@ -234,26 +247,28 @@ namespace Darkan.Grid
             _gridMesh.SetUVs(0, uvs);
             _gridMesh.SetTriangles(triangles, 0);
 
-            GetComponent<MeshCollider>().sharedMesh = _gridMesh;
+            _gridMesh.Optimize();
+            //_gridMesh.UploadMeshData(true);
+            GetComponent<MeshFilter>().sharedMesh = _gridMesh;
         }
 
-#if UNITY_EDITOR
-        TextMeshPro CreateWorldText(string text, Vector3 worldPos, Vector2Int tileIndex)
+        TextMeshPro CreateWorldText(string text, Vector3 worldPos, Vector2Int cellIndex)
         {
             GameObject go;
+
             if (_textPrefab != null)
                 go = Instantiate(_textPrefab.gameObject);
             else
-                go = new($"Grid_Text {tileIndex}", typeof(TextMeshPro));
+                go = new($"Grid_Text {cellIndex}", typeof(TextMeshPro));
 
             Transform transform = go.transform;
             transform.position = worldPos;
-            transform.localScale *= _tileSize;
+            transform.localScale *= _cellSize;
 
             if (_dimensions == Dimensions.XZ)
                 transform.rotation = Quaternion.Euler(90, 0, 0);
 
-            transform.SetParent(this.transform, false);
+            transform.SetParent(_transform, false);
 
             TextMeshPro textMesh = go.GetComponent<TextMeshPro>();
             textMesh.text = text;
@@ -265,71 +280,70 @@ namespace Darkan.Grid
             textMesh.fontSize = 4;
             return textMesh;
         }
-#endif  
 
-        Vector3 GetLocalPositionByTileIndex(Vector2Int tileIndex)
+        internal Vector3 GetLocalPositionByCellIndex(Vector2Int cellIndex)
         {
             Vector3 worldPos = Vector3.zero;
 
             switch (_dimensions)
             {
                 case Dimensions.XY:
-                    worldPos = new Vector3(tileIndex.x, tileIndex.y, 0) * _tileSize + _origin;
+                    worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _origin;
                     break;
 
                 case Dimensions.XZ:
-                    worldPos = new Vector3(tileIndex.x, 0, tileIndex.y) * _tileSize + _origin;
+                    worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _origin;
                     break;
             }
             return worldPos;
         }
 
-        public bool TryGetWorldPositionByTileIndex(Vector2Int tileIndex, out Vector3 worldPos, bool middleOfTile = false)
+        public bool GetWorldPositionByCellIndex(Vector2Int cellIndex, out Vector3 worldPos, bool middleOfCell = false)
         {
             worldPos = default;
 
-            if (!InBounds(tileIndex))
+            if (!InBounds(cellIndex))
                 return false;
 
             switch (_dimensions)
             {
                 case Dimensions.XY:
-                    worldPos = new Vector3(tileIndex.x, tileIndex.y, 0) * _tileSize + _origin + transform.position;
-                    if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, _tileSize * .5f);
+                    worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _origin + _transform.position;
+                    if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, _cellSize * .5f);
                     break;
                 case Dimensions.XZ:
-                    worldPos = new Vector3(tileIndex.x, 0, tileIndex.y) * _tileSize + _origin + transform.position;
-                    if (middleOfTile) worldPos += new Vector3(_tileSize * .5f, 0, _tileSize * .5f);
+                    worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _origin + _transform.position;
+                    if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, 0, _cellSize * .5f);
                     break;
             }
 
             return true;
         }
 
-        public bool TryGetTileIndex(Vector3 worldPos, out Vector2Int tileIndex)
+        public bool GetCellIndex(Vector3 worldPos, out Vector2Int cellIndex)
         {
-            tileIndex = default;
+            cellIndex = default;
 
-            tileIndex.x = Mathf.FloorToInt((worldPos.x - _origin.x - transform.position.x) / _tileSize);
+            cellIndex.x = Mathf.FloorToInt((worldPos.x - _origin.x - _transform.position.x) / _cellSize);
 
-            if (tileIndex.x < 0 || tileIndex.x >= _gridSize.x)
+            if (cellIndex.x < 0 || cellIndex.x >= _gridSize.x)
             {
-                tileIndex.y = default;
+                cellIndex.y = default;
                 return false;
             }
 
             switch (_dimensions)
             {
                 case Dimensions.XY:
-                    tileIndex.y = Mathf.FloorToInt((worldPos.y - _origin.y - transform.position.y) / _tileSize);
+                    cellIndex.y = Mathf.FloorToInt((worldPos.y - _origin.y - _transform.position.y) / _cellSize);
                     break;
 
                 case Dimensions.XZ:
-                    tileIndex.y = Mathf.FloorToInt((worldPos.z - _origin.z - transform.position.z) / _tileSize);
+                    cellIndex.y = Mathf.FloorToInt((worldPos.z - _origin.z - _transform.position.z) / _cellSize);
                     break;
             }
 
-            if (tileIndex.y < 0 || tileIndex.y >= _gridSize.y)
+            if (cellIndex.y < 0 || cellIndex.y >= _gridSize.y)
             {
                 return false;
             }
@@ -337,78 +351,83 @@ namespace Darkan.Grid
             return true;
         }
 
-        public void SetTileObject(Vector2Int tileIndex, T tile)
+        /// <summary>
+        /// Tries to set the cell at the given index. Only needed for struct cells.
+        /// </summary>
+        public void SetCell(Vector2Int cellIndex, T cell)
         {
-            if (!InBounds(tileIndex)) return;
+            if (!InBounds(cellIndex)) return;
 
-            _grid[tileIndex.x, tileIndex.y] = tile;
+            _grid[cellIndex.x, cellIndex.y] = cell;
 
-#if UNITY_EDITOR
-            if (_debugTiles == DebugTiles.ShowValues)
-                UpdateTileValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
-#endif
+            if (_debugCells == DebugCells.ShowValues)
+                UpdateCellValue(_grid[cellIndex.x, cellIndex.y], _textGrid[cellIndex.x, cellIndex.y]);
         }
 
-        public void SetTileObject(Vector3 worldPosition, T tile)
+        /// <summary>
+        /// Tries to set the cell at the given world position. Only needed for struct cells.
+        /// </summary>
+        public void SetCell(Vector3 worldPosition, T cell)
         {
-            if (TryGetTileIndex(worldPosition, out Vector2Int tileIndex))
-                SetTileObject(tileIndex, tile);
+            if (GetCellIndex(worldPosition, out Vector2Int cellIndex))
+                SetCell(cellIndex, cell);
         }
 
-        public bool TryGetTile(Vector2Int tileIndex, out T tile)
+        public bool GetTile(Vector2Int cellIndex, out T cell)
         {
-            if (!InBounds(tileIndex))
+            if (!InBounds(cellIndex))
             {
-                tile = default;
+                cell = default;
                 return false;
             }
 
-            tile = _grid[tileIndex.x, tileIndex.y];
+            cell = _grid[cellIndex.x, cellIndex.y];
             return true;
         }
 
-        public bool TryGetTile(Vector3 worldPos, out T tile)
+        public bool GetTile(Vector3 worldPos, out T cell)
         {
-            if (TryGetTileIndex(worldPos, out Vector2Int tileIndex))
+            if (GetCellIndex(worldPos, out Vector2Int tileIndex))
             {
-                tile = _grid[tileIndex.x, tileIndex.y];
+                cell = _grid[tileIndex.x, tileIndex.y];
                 return true;
             }
             else
             {
-                tile = default;
+                cell = default;
                 return false;
             }
         }
 
-        public bool TryGetTileIndexByMousePosition(out Vector2Int tileIndex)
+        /// <summary>
+        /// Does a raycast with the screen mouse position and returns the cell index if a cell was hit
+        /// </summary>
+        public bool GetCellIndexWithMousePosition(out Vector2Int cellIndex)
         {
-            if (RaycastMousePositionOnGrid(out Vector3 mousePos))
+            if (RaycastMousePositionOnGrid(out RaycastHit hit))
             {
-                if (TryGetTileIndex(mousePos, out Vector2Int tileObjIndex))
+                if (GetCellIndex(hit.point, out cellIndex))
                 {
-                    tileIndex = tileObjIndex;
                     return true;
                 }
             }
-            tileIndex = Vector2Int.zero;
+
+            cellIndex = default;
             return false;
         }
 
-        bool RaycastMousePositionOnGrid(out Vector3 mousePos)
+        /// <summary>
+        /// Does a raycast with the screen mouse position for the grid layer
+        /// </summary>
+        /// <returns>The hit</returns>
+        public bool RaycastMousePositionOnGrid(out RaycastHit hit)
         {
             Ray ray = GameHelper.MainCamera.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, GridLayer))
-            {
-                mousePos = hit.point;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, GridLayer))
                 return true;
-            }
             else
-            {
-                mousePos = Vector3.zero;
                 return false;
-            }
         }
     }
 }
