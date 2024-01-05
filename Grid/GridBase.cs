@@ -57,21 +57,32 @@ namespace Darkan.Grid
 
         T[,] _grid;
 
-        protected virtual void OnEnable()
+        protected virtual void Awake()
         {
             _transform = GetComponent<Transform>();
             GridLayer = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
             _gridMesh = GetComponent<MeshFilter>().sharedMesh;
 
-            BuildGrid();
-
             GetComponent<MeshCollider>().sharedMesh = _gridMesh;
+        }
+
+        protected virtual void Start()
+        {
+            BuildGrid();
+            BuildGridMesh();
+            CreateDebugCellText();
         }
 
         // Used by Odin Inspector to update the grid on inspector values changed
         void UpdateGridInEditor()
         {
-            BuildGrid();
+            if (Application.isPlaying)
+            {
+                BuildGrid();
+            }
+
+            BuildGridMesh();
+            CreateDebugCellText();
         }
 
         protected abstract T SetInitialCellValue();
@@ -108,10 +119,6 @@ namespace Darkan.Grid
                     CellSetup(tile, new Vector2Int(x, y));
                 }
             }
-
-            BuildGridMesh();
-
-            CreateDebugCellText();
         }
 
         void CreateDebugCellText()
@@ -131,45 +138,45 @@ namespace Darkan.Grid
             }
 
             if (_debugCells is DebugCells.Disabled) return;
+            if (_debugCells is DebugCells.ShowValues && !Application.isPlaying)
+            {
+                Debug.LogWarning("Debug Show Values only works while playing");
+                return;
+            }
 
             _textGrid = new TextMeshPro[_gridSize.x, _gridSize.y];
 
             Vector2Int cellIndex = Vector2Int.zero;
 
-            foreach (T cell in _grid)
+            for (cellIndex.y = 0; cellIndex.y < _gridSize.y; cellIndex.y++)
             {
-                if (cellIndex.y == _gridSize.y)
+                for (cellIndex.x = 0; cellIndex.x < _gridSize.x; cellIndex.x++)
                 {
-                    cellIndex.y = 0;
-                    cellIndex.x++;
+                    string debugText = string.Empty;
+
+                    switch (_debugCells)
+                    {
+                        case DebugCells.ShowValues:
+                            debugText = _grid[cellIndex.x, cellIndex.y].ToString();
+                            break;
+                        case DebugCells.ShowIndices:
+                            debugText = $"[{cellIndex.x},{cellIndex.y}]";
+                            break;
+                    }
+
+                    switch (_dimensions)
+                    {
+                        case Dimensions.XY:
+                            _textGrid[cellIndex.x, cellIndex.y] = CreateWorldText(debugText,
+                                GetLocalPositionByCellIndex(cellIndex) + new Vector3(_cellSize, _cellSize, 0) * 0.5f, cellIndex);
+                            break;
+
+                        case Dimensions.XZ:
+                            _textGrid[cellIndex.x, cellIndex.y] = CreateWorldText(debugText,
+                                GetLocalPositionByCellIndex(cellIndex) + new Vector3(_cellSize, 0, _cellSize) * 0.5f, cellIndex);
+                            break;
+                    }
                 }
-
-                string debugText = string.Empty;
-
-                switch (_debugCells)
-                {
-                    case DebugCells.ShowValues:
-                        debugText = cell.ToString();
-                        break;
-                    case DebugCells.ShowIndices:
-                        debugText = $"{cellIndex.x},{cellIndex.y}";
-                        break;
-                }
-
-                switch (_dimensions)
-                {
-                    case Dimensions.XY:
-                        _textGrid[cellIndex.x, cellIndex.y] = CreateWorldText(debugText,
-                            GetLocalPositionByCellIndex(cellIndex) + new Vector3(_cellSize, _cellSize, 0) * 0.5f, cellIndex);
-                        break;
-
-                    case Dimensions.XZ:
-                        _textGrid[cellIndex.x, cellIndex.y] = CreateWorldText(debugText,
-                            GetLocalPositionByCellIndex(cellIndex) + new Vector3(_cellSize, 0, _cellSize) * 0.5f, cellIndex);
-                        break;
-                }
-
-                cellIndex.y++;
             }
         }
 
@@ -191,18 +198,18 @@ namespace Darkan.Grid
                 _gridMesh = new();
             }
 
-            Vector3[] vertices = new Vector3[4 * _grid.Length];
+            Vector3[] vertices = new Vector3[4 * _gridSize.x * _gridSize.y];
             Vector2[] uvs = new Vector2[vertices.Length];
-            int[] triangles = new int[6 * _grid.Length];
+            int[] triangles = new int[6 * _gridSize.x * _gridSize.y];
 
             int indexCurrVertex = 0;
             int indexCurrTriangle = 0;
 
             Vector2Int currTileIndex = Vector2Int.zero;
 
-            for (currTileIndex.y = 0; currTileIndex.y < _grid.GetLength(1); currTileIndex.y++)
+            for (currTileIndex.y = 0; currTileIndex.y < _gridSize.y; currTileIndex.y++)
             {
-                for (currTileIndex.x = 0; currTileIndex.x < _grid.GetLength(0); currTileIndex.x++)
+                for (currTileIndex.x = 0; currTileIndex.x < _gridSize.x; currTileIndex.x++)
                 {
                     Vector3 lowerLeftVertexPos = GetLocalPositionByCellIndex(currTileIndex);
 
@@ -275,7 +282,7 @@ namespace Darkan.Grid
 
             textMesh.color = Color.white;
             textMesh.alignment = TextAlignmentOptions.Center;
-            textMesh.fontSize = 4;
+            textMesh.fontSize = 3.5f;
             return textMesh;
         }
 
