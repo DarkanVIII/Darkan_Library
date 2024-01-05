@@ -11,7 +11,7 @@ namespace Darkan.StateMachine.Component
         protected TManager StateMachine;
 #endif
 
-        public void Init(TMachine stateMachine)
+        public virtual void Init(TMachine stateMachine)
         {
             StateMachine = stateMachine;
         }
