@@ -12,7 +12,7 @@ namespace Darkan.Grid
     public abstract class GridBase<T> : SerializedMonoBehaviour
     {
         enum Dimensions { XY, XZ }
-        [InfoBox("Put this GameObject on a separate grid layer (for raycasts)")]
+        [InfoBox("Put this GameObject on a separate grid layer or exclude layers in the mesh collider (for raycasts)")]
         [Title("Grid Setup")]
 
         [SerializeField, EnumToggleButtons]
@@ -26,10 +26,6 @@ namespace Darkan.Grid
         [SerializeField]
         [OnValueChanged("UpdateGridInEditor")]
         float _cellSize;
-
-        [SerializeField]
-        [OnValueChanged("UpdateGridInEditor")]
-        Vector3 _origin;
 
         [Title("Debug")]
         enum DebugCells { Disabled, ShowValues, ShowIndices }
@@ -50,7 +46,7 @@ namespace Darkan.Grid
 
         public Vector2Int GridSize => _gridSize;
         public float CellSize => _cellSize;
-        public Vector3 Origin => _origin;
+        protected T[,] Grid => _grid;
 
         TextMeshPro[,] _textGrid;
 
@@ -98,13 +94,10 @@ namespace Darkan.Grid
 
         void BuildGrid()
         {
-            Debug.Log("Build Grid called");
-
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
             _grid = new T[_gridSize.x, _gridSize.y];
-            Debug.Log($"Grid is built {_grid.Length}");
 
             for (int y = 0; y < _grid.GetLength(1); y++)
             {
@@ -250,7 +243,10 @@ namespace Darkan.Grid
             _gridMesh.SetTriangles(triangles, 0);
 
             _gridMesh.Optimize();
-            //_gridMesh.UploadMeshData(true);
+
+#if !UNITY_EDITOR
+            _gridMesh.UploadMeshData(true);
+#endif  
             GetComponent<MeshFilter>().sharedMesh = _gridMesh;
         }
 
@@ -290,11 +286,11 @@ namespace Darkan.Grid
             switch (_dimensions)
             {
                 case Dimensions.XY:
-                    worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _origin;
+                    worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize;
                     break;
 
                 case Dimensions.XZ:
-                    worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _origin;
+                    worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize;
                     break;
             }
             return worldPos;
@@ -304,29 +300,31 @@ namespace Darkan.Grid
         {
             worldPos = default;
 
-            if (!InBounds(cellIndex))
-                return false;
-
-            switch (_dimensions)
+            if (InBounds(cellIndex))
             {
-                case Dimensions.XY:
-                    worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _origin + _transform.position;
-                    if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, _cellSize * .5f);
-                    break;
-                case Dimensions.XZ:
-                    worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _origin + _transform.position;
-                    if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, 0, _cellSize * .5f);
-                    break;
+                switch (_dimensions)
+                {
+                    case Dimensions.XY:
+                        worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _transform.position;
+                        if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, _cellSize * .5f);
+                        break;
+                    case Dimensions.XZ:
+                        worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _transform.position;
+                        if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, 0, _cellSize * .5f);
+                        break;
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         public bool GetCellIndex(Vector3 worldPos, out Vector2Int cellIndex)
         {
             cellIndex = default;
 
-            cellIndex.x = Mathf.FloorToInt((worldPos.x - _origin.x - _transform.position.x) / _cellSize);
+            cellIndex.x = Mathf.FloorToInt((worldPos.x - _transform.position.x) / _cellSize);
 
             if (cellIndex.x < 0 || cellIndex.x >= _gridSize.x)
             {
@@ -337,11 +335,11 @@ namespace Darkan.Grid
             switch (_dimensions)
             {
                 case Dimensions.XY:
-                    cellIndex.y = Mathf.FloorToInt((worldPos.y - _origin.y - _transform.position.y) / _cellSize);
+                    cellIndex.y = Mathf.FloorToInt((worldPos.y - _transform.position.y) / _cellSize);
                     break;
 
                 case Dimensions.XZ:
-                    cellIndex.y = Mathf.FloorToInt((worldPos.z - _origin.z - _transform.position.z) / _cellSize);
+                    cellIndex.y = Mathf.FloorToInt((worldPos.z - _transform.position.z) / _cellSize);
                     break;
             }
 
@@ -369,7 +367,7 @@ namespace Darkan.Grid
         /// <summary>
         /// Tries to set the cell at the given world position. Only needed for struct cells.
         /// </summary>
-        public void SetCellObject(Vector3 worldPosition, T cell)
+        public void SetCell(Vector3 worldPosition, T cell)
         {
             if (GetCellIndex(worldPosition, out Vector2Int cellIndex))
                 SetCellObject(cellIndex, cell);
