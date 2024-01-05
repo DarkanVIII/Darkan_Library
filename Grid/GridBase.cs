@@ -57,7 +57,7 @@ namespace Darkan.Grid
 
         T[,] _grid;
 
-        protected virtual void Awake()
+        protected virtual void OnEnable()
         {
             _transform = GetComponent<Transform>();
             GridLayer = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
