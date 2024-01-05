@@ -43,18 +43,16 @@ namespace Darkan.Grid
         bool DebugCellsAreDisabled => _debugCells is DebugCells.Disabled;
 
         protected LayerMask GridLayer;
-
         public Vector2Int GridSize => _gridSize;
         public float CellSize => _cellSize;
         protected T[,] Grid => _grid;
-
-        TextMeshPro[,] _textGrid;
+        protected Transform Transform => _transform;
 
         [ShowInInspector, ReadOnly]
         [InlineEditor(InlineEditorObjectFieldModes.Boxed, DrawPreview = true, PreviewAlignment = PreviewAlignment.Bottom, PreviewHeight = 150, Expanded = false)]
         Mesh _gridMesh;
         Transform _transform;
-
+        TextMeshPro[,] _textGrid;
         T[,] _grid;
 
         protected virtual void Awake()
@@ -73,7 +71,7 @@ namespace Darkan.Grid
             CreateDebugCellText();
         }
 
-        // Used by Odin Inspector to update the grid on inspector values changed
+        // Used by Inspector variables to update the grid on inspector values changed
         void UpdateGridInEditor()
         {
             if (Application.isPlaying)
@@ -361,7 +359,7 @@ namespace Darkan.Grid
         /// <summary>
         /// Tries to set the cell at the given index. Only needed for struct cells.
         /// </summary>
-        public void SetCellObject(Vector2Int cellIndex, T cell)
+        public void SetCell(Vector2Int cellIndex, T cell)
         {
             if (!InBounds(cellIndex)) return;
 
@@ -377,7 +375,7 @@ namespace Darkan.Grid
         public void SetCell(Vector3 worldPosition, T cell)
         {
             if (GetCellIndex(worldPosition, out Vector2Int cellIndex))
-                SetCellObject(cellIndex, cell);
+                SetCell(cellIndex, cell);
         }
 
         public bool GetCell(Vector2Int cellIndex, out T cell)
