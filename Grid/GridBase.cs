@@ -354,7 +354,7 @@ namespace Darkan.Grid
         /// <summary>
         /// Tries to set the cell at the given index. Only needed for struct cells.
         /// </summary>
-        public void SetCell(Vector2Int cellIndex, T cell)
+        public void SetCellObject(Vector2Int cellIndex, T cell)
         {
             if (!InBounds(cellIndex)) return;
 
@@ -367,29 +367,31 @@ namespace Darkan.Grid
         /// <summary>
         /// Tries to set the cell at the given world position. Only needed for struct cells.
         /// </summary>
-        public void SetCell(Vector3 worldPosition, T cell)
+        public void SetCellObject(Vector3 worldPosition, T cell)
         {
             if (GetCellIndex(worldPosition, out Vector2Int cellIndex))
-                SetCell(cellIndex, cell);
+                SetCellObject(cellIndex, cell);
         }
 
-        public bool GetTile(Vector2Int cellIndex, out T cell)
+        public bool GetCell(Vector2Int cellIndex, out T cell)
         {
-            if (!InBounds(cellIndex))
+            if (InBounds(cellIndex))
+            {
+                cell = _grid[cellIndex.x, cellIndex.y];
+                return true;
+            }
+            else
             {
                 cell = default;
                 return false;
             }
-
-            cell = _grid[cellIndex.x, cellIndex.y];
-            return true;
         }
 
-        public bool GetTile(Vector3 worldPos, out T cell)
+        public bool GetCell(Vector3 worldPos, out T cell)
         {
-            if (GetCellIndex(worldPos, out Vector2Int tileIndex))
+            if (GetCellIndex(worldPos, out Vector2Int cellIndex))
             {
-                cell = _grid[tileIndex.x, tileIndex.y];
+                cell = _grid[cellIndex.x, cellIndex.y];
                 return true;
             }
             else
