@@ -9,11 +9,10 @@ namespace Darkan.Grid
     [ExecuteAlways]
     [Searchable]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
-    [InfoBox("Put this GameObject on a separate grid layer (for raycasts)")]
     public abstract class GridBase<T> : SerializedMonoBehaviour
     {
         enum Dimensions { XY, XZ }
-
+        [InfoBox("Put this GameObject on a separate grid layer (for raycasts)")]
         [Title("Grid Setup")]
 
         [SerializeField, EnumToggleButtons]
@@ -99,10 +98,13 @@ namespace Darkan.Grid
 
         void BuildGrid()
         {
+            Debug.Log("Build Grid called");
+
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
             _grid = new T[_gridSize.x, _gridSize.y];
+            Debug.Log($"Grid is built {_grid.Length}");
 
             for (int y = 0; y < _grid.GetLength(1); y++)
             {
