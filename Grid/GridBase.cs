@@ -2,12 +2,8 @@ namespace Darkan.Grid
 {
     using Darkan.RuntimeTools;
     using Sirenix.OdinInspector;
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using TMPro;
-    using Unity.Burst;
-    using Unity.Collections;
-    using Unity.Mathematics;
     using UnityEngine;
 
     [ExecuteAlways]
@@ -61,7 +57,6 @@ namespace Darkan.Grid
         Transform _transform;
         TextMeshPro[,] _textGrid;
         TCell[,] _grid;
-        //NativeArray<TCell> _gridNative;
 
 
         protected virtual void Awake()
@@ -97,7 +92,6 @@ namespace Darkan.Grid
             else
             {
                 BuildGridMesh();
-                CreateDebugCellText();
             }
         }
 
@@ -120,7 +114,6 @@ namespace Darkan.Grid
             else
             {
                 BuildGridMesh();
-                CreateDebugCellText();
             }
         }
 
@@ -135,14 +128,7 @@ namespace Darkan.Grid
         {
             if (_debugCells is DebugCells.ShowValues)
                 UpdateCellValue(_grid[cellIndex.x, cellIndex.y], _textGrid[cellIndex.x, cellIndex.y]);
-            //if (_debugCells is DebugCells.ShowValues)
-            //    UpdateCellValue(_gridNative[x * _gridSize.y + y * _gridSize.x], _textGrid[x, y]);
         }
-
-        //ushort GetFlatCellIndex(ushort x, ushort y)
-        //{
-        //    //return _gridSize.x * y + x;
-        //}
 
         /// <summary>
         /// Called on each cell when the grid is built. Use this to set up the cell.
@@ -152,7 +138,6 @@ namespace Darkan.Grid
         void BuildGrid()
         {
             _grid = new TCell[_gridSize.x, _gridSize.y];
-            //_gridNative = new NativeArray<TCell>(_gridSize.x * _gridSize.y, Allocator.Persistent);
 
             for (int y = 0; y < _grid.GetLength(1); y++)
             {
@@ -163,16 +148,6 @@ namespace Darkan.Grid
                     CellSetup(tile, new Vector2Int(x, y));
                 }
             }
-
-            //for (int y = 0; y < _gridSize.y; y++)
-            //{
-            //    for (int x = 0; x < _gridSize.x; x++)
-            //    {
-            //        TCell tile = SetInitialCellValue();
-            //        _gridNative[y * _gridSize.x + x] = tile;
-            //        CellSetup(tile, x, y);
-            //    }
-            //}
         }
 
         void CreateDebugCellText()
@@ -224,19 +199,17 @@ namespace Darkan.Grid
 
         void ClearTextGrid()
         {
-            if (_textGrid != null)
+            if (_textGrid is null) return;
+
+            foreach (TextMeshPro txtMesh in _textGrid)
             {
-                foreach (TextMeshPro txtMesh in _textGrid)
+                if (txtMesh != null)
                 {
-                    if (txtMesh != null)
-                    {
-                        if (Application.isPlaying)
-                            Destroy(txtMesh.gameObject);
-                        else
-                            DestroyImmediate(txtMesh.gameObject);
-                    }
+                    if (Application.isPlaying)
+                        Destroy(txtMesh.gameObject);
+                    else
+                        DestroyImmediate(txtMesh.gameObject);
                 }
-                _textGrid = null;
             }
         }
 
@@ -313,7 +286,7 @@ namespace Darkan.Grid
 
 #if !UNITY_EDITOR
             _gridMesh.UploadMeshData(true);
-#endif  
+#endif
             GetComponent<MeshFilter>().sharedMesh = _gridMesh;
         }
 
@@ -497,11 +470,6 @@ namespace Darkan.Grid
                 return true;
             else
                 return false;
-        }
-
-        void OnDestroy()
-        {
-            //_gridNative.Dispose();
         }
     }
 }
