@@ -2,14 +2,18 @@ namespace Darkan.Grid
 {
     using Darkan.RuntimeTools;
     using Sirenix.OdinInspector;
+    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using TMPro;
+    using Unity.Burst;
+    using Unity.Collections;
+    using Unity.Mathematics;
     using UnityEngine;
 
     [ExecuteAlways]
     [Searchable]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
-    public abstract class GridBase<T> : SerializedMonoBehaviour
+    public abstract class GridBase<TCell> : SerializedMonoBehaviour where TCell : struct
     {
         enum Dimensions { XY, XZ }
         [InfoBox("Put this GameObject on a separate grid layer or exclude layers in the mesh collider (for raycasts)")]
@@ -27,6 +31,9 @@ namespace Darkan.Grid
         [OnValueChanged("UpdateGridInEditor")]
         float _cellSize;
 
+        [SerializeField]
+        bool _displayGridIngame;
+
         [Title("Debug")]
         enum DebugCells { Disabled, ShowValues, ShowIndices }
 
@@ -36,24 +43,26 @@ namespace Darkan.Grid
 
         [SerializeField, AssetsOnly]
         [LabelText("Text Prefab (optional)")]
-        [HideIf("DebugCellsAreDisabled")]
+        [ShowIf("DebugCellsAreEnabled")]
         [OnValueChanged("UpdateGridInEditor")]
         TextMeshPro _textPrefab;
 
-        bool DebugCellsAreDisabled => _debugCells is DebugCells.Disabled;
+        bool DebugCellsAreEnabled => _debugCells is not DebugCells.Disabled;
 
         protected LayerMask GridLayer;
         public Vector2Int GridSize => _gridSize;
         public float CellSize => _cellSize;
-        protected T[,] Grid => _grid;
+        protected TCell[,] Grid => _grid;
         protected Transform Transform => _transform;
 
-        [ShowInInspector, ReadOnly]
+        [ShowInInspector, Sirenix.OdinInspector.ReadOnly]
         [InlineEditor(InlineEditorObjectFieldModes.Boxed, DrawPreview = true, PreviewAlignment = PreviewAlignment.Bottom, PreviewHeight = 150, Expanded = false)]
         Mesh _gridMesh;
         Transform _transform;
         TextMeshPro[,] _textGrid;
-        T[,] _grid;
+        TCell[,] _grid;
+        //NativeArray<TCell> _gridNative;
+
 
         protected virtual void Awake()
         {
@@ -66,74 +75,109 @@ namespace Darkan.Grid
 
         protected virtual void Start()
         {
+            if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
+            if (_cellSize <= 0) return;
+
             BuildGrid();
-            BuildGridMesh();
-            CreateDebugCellText();
+
+            if (Application.isPlaying)
+            {
+                if (_displayGridIngame)
+                {
+                    BuildGridMesh();
+                    CreateDebugCellText();
+                }
+                else
+                {
+                    ClearTextGrid();
+                    if (_gridMesh != null)
+                        _gridMesh.Clear();
+                }
+            }
+            else
+            {
+                BuildGridMesh();
+                CreateDebugCellText();
+            }
         }
 
         // Used by Inspector variables to update the grid on inspector values changed
         void UpdateGridInEditor()
         {
+            if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
+            if (_cellSize <= 0) return;
+
             if (Application.isPlaying)
             {
                 BuildGrid();
-            }
 
-            BuildGridMesh();
-            CreateDebugCellText();
+                if (_displayGridIngame)
+                {
+                    BuildGridMesh();
+                    CreateDebugCellText();
+                }
+            }
+            else
+            {
+                BuildGridMesh();
+                CreateDebugCellText();
+            }
         }
 
-        protected abstract T SetInitialCellValue();
+        protected abstract TCell SetInitialCellValue();
 
-        protected virtual void UpdateCellValue(T cell, TextMeshPro textMesh)
+        protected virtual void UpdateCellValue(TCell cell, TextMeshPro textMesh)
         {
             textMesh.text = cell.ToString();
         }
 
-        public void UpdateCellValue(Vector2Int tileIndex)
+        public void UpdateCellValue(Vector2Int cellIndex)
         {
             if (_debugCells is DebugCells.ShowValues)
-                UpdateCellValue(_grid[tileIndex.x, tileIndex.y], _textGrid[tileIndex.x, tileIndex.y]);
+                UpdateCellValue(_grid[cellIndex.x, cellIndex.y], _textGrid[cellIndex.x, cellIndex.y]);
+            //if (_debugCells is DebugCells.ShowValues)
+            //    UpdateCellValue(_gridNative[x * _gridSize.y + y * _gridSize.x], _textGrid[x, y]);
         }
+
+        //ushort GetFlatCellIndex(ushort x, ushort y)
+        //{
+        //    //return _gridSize.x * y + x;
+        //}
 
         /// <summary>
         /// Called on each cell when the grid is built. Use this to set up the cell.
         /// </summary>
-        protected abstract void CellSetup(T cell, Vector2Int cellIndex);
+        protected abstract void CellSetup(TCell cell, Vector2Int cellIndex);
 
         void BuildGrid()
         {
-            if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
-            if (_cellSize <= 0) return;
-
-            _grid = new T[_gridSize.x, _gridSize.y];
+            _grid = new TCell[_gridSize.x, _gridSize.y];
+            //_gridNative = new NativeArray<TCell>(_gridSize.x * _gridSize.y, Allocator.Persistent);
 
             for (int y = 0; y < _grid.GetLength(1); y++)
             {
                 for (int x = 0; x < _grid.GetLength(0); x++)
                 {
-                    T tile = SetInitialCellValue();
+                    TCell tile = SetInitialCellValue();
                     _grid[x, y] = tile;
                     CellSetup(tile, new Vector2Int(x, y));
                 }
             }
+
+            //for (int y = 0; y < _gridSize.y; y++)
+            //{
+            //    for (int x = 0; x < _gridSize.x; x++)
+            //    {
+            //        TCell tile = SetInitialCellValue();
+            //        _gridNative[y * _gridSize.x + x] = tile;
+            //        CellSetup(tile, x, y);
+            //    }
+            //}
         }
 
         void CreateDebugCellText()
         {
-            if (_textGrid != null)
-            {
-                foreach (var txtMesh in _textGrid)
-                {
-                    if (txtMesh != null)
-                    {
-                        if (Application.isPlaying)
-                            Destroy(txtMesh.gameObject);
-                        else
-                            DestroyImmediate(txtMesh.gameObject);
-                    }
-                }
-            }
+            ClearTextGrid();
 
             if (_debugCells is DebugCells.Disabled) return;
             if (_debugCells is DebugCells.ShowValues && !Application.isPlaying)
@@ -175,6 +219,24 @@ namespace Darkan.Grid
                             break;
                     }
                 }
+            }
+        }
+
+        void ClearTextGrid()
+        {
+            if (_textGrid != null)
+            {
+                foreach (TextMeshPro txtMesh in _textGrid)
+                {
+                    if (txtMesh != null)
+                    {
+                        if (Application.isPlaying)
+                            Destroy(txtMesh.gameObject);
+                        else
+                            DestroyImmediate(txtMesh.gameObject);
+                    }
+                }
+                _textGrid = null;
             }
         }
 
@@ -301,28 +363,28 @@ namespace Darkan.Grid
             return worldPos;
         }
 
-        public bool GetWorldPositionByCellIndex(Vector2Int cellIndex, out Vector3 worldPos, bool middleOfCell = false)
+        public bool GetWorldPositionByCellIndex(Vector2Int cellIndex, out Vector3 worldPos, bool middleOfCell = false, bool checkIfInBounds = true)
         {
             worldPos = default;
 
-            if (InBounds(cellIndex))
+            if (checkIfInBounds && !InBounds(cellIndex))
             {
-                switch (_dimensions)
-                {
-                    case Dimensions.XY:
-                        worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _transform.position;
-                        if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, _cellSize * .5f);
-                        break;
-                    case Dimensions.XZ:
-                        worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _transform.position;
-                        if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, 0, _cellSize * .5f);
-                        break;
-                }
-
-                return true;
+                return false;
             }
 
-            return false;
+            switch (_dimensions)
+            {
+                case Dimensions.XY:
+                    worldPos = new Vector3(cellIndex.x, cellIndex.y, 0) * _cellSize + _transform.position;
+                    if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, _cellSize * .5f);
+                    break;
+                case Dimensions.XZ:
+                    worldPos = new Vector3(cellIndex.x, 0, cellIndex.y) * _cellSize + _transform.position;
+                    if (middleOfCell) worldPos += new Vector3(_cellSize * .5f, 0, _cellSize * .5f);
+                    break;
+            }
+
+            return true;
         }
 
         public bool GetCellIndex(Vector3 worldPos, out Vector2Int cellIndex)
@@ -359,7 +421,7 @@ namespace Darkan.Grid
         /// <summary>
         /// Tries to set the cell at the given index. Only needed for struct cells.
         /// </summary>
-        public void SetCell(Vector2Int cellIndex, T cell)
+        public void SetCell(Vector2Int cellIndex, TCell cell)
         {
             if (!InBounds(cellIndex)) return;
 
@@ -372,13 +434,13 @@ namespace Darkan.Grid
         /// <summary>
         /// Tries to set the cell at the given world position. Only needed for struct cells.
         /// </summary>
-        public void SetCell(Vector3 worldPosition, T cell)
+        public void SetCell(Vector3 worldPosition, TCell cell)
         {
             if (GetCellIndex(worldPosition, out Vector2Int cellIndex))
                 SetCell(cellIndex, cell);
         }
 
-        public bool GetCell(Vector2Int cellIndex, out T cell)
+        public bool GetCell(Vector2Int cellIndex, out TCell cell)
         {
             if (InBounds(cellIndex))
             {
@@ -392,7 +454,7 @@ namespace Darkan.Grid
             }
         }
 
-        public bool GetCell(Vector3 worldPos, out T cell)
+        public bool GetCell(Vector3 worldPos, out TCell cell)
         {
             if (GetCellIndex(worldPos, out Vector2Int cellIndex))
             {
@@ -435,6 +497,11 @@ namespace Darkan.Grid
                 return true;
             else
                 return false;
+        }
+
+        void OnDestroy()
+        {
+            //_gridNative.Dispose();
         }
     }
 }
