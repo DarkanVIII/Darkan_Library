@@ -9,7 +9,7 @@ namespace Darkan.Grid
     [ExecuteAlways]
     [Searchable]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
-    public abstract class GridBase<TCell> : SerializedMonoBehaviour where TCell : struct
+    public abstract class GridBase<TCell> : SerializedMonoBehaviour
     {
         enum Dimensions { XY, XZ }
         [InfoBox("Put this GameObject on a separate grid layer or exclude layers in the mesh collider (for raycasts)")]
