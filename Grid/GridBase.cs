@@ -117,7 +117,10 @@ namespace Darkan.Grid
             }
         }
 
-        protected abstract TCell SetInitialCellValue();
+        /// <summary>
+        /// Set the initial value of each cell.
+        /// </summary>
+        protected abstract TCell CellSetup(Vector2Int cellIndex);
 
         protected virtual void UpdateCellValue(TCell cell, TextMeshPro textMesh)
         {
@@ -130,11 +133,6 @@ namespace Darkan.Grid
                 UpdateCellValue(_grid[cellIndex.x, cellIndex.y], _textGrid[cellIndex.x, cellIndex.y]);
         }
 
-        /// <summary>
-        /// Called on each cell when the grid is built. Use this to set up the cell.
-        /// </summary>
-        protected abstract void CellSetup(TCell cell, Vector2Int cellIndex);
-
         void BuildGrid()
         {
             _grid = new TCell[_gridSize.x, _gridSize.y];
@@ -143,9 +141,8 @@ namespace Darkan.Grid
             {
                 for (int x = 0; x < _grid.GetLength(0); x++)
                 {
-                    TCell tile = SetInitialCellValue();
+                    TCell tile = CellSetup(new Vector2Int(x, y));
                     _grid[x, y] = tile;
-                    CellSetup(tile, new Vector2Int(x, y));
                 }
             }
         }
