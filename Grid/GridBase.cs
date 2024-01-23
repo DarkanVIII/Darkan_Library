@@ -73,10 +73,10 @@ namespace Darkan.Grid
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
-            BuildGrid();
-
             if (Application.isPlaying)
             {
+                BuildGrid();
+
                 if (_displayGridIngame)
                 {
                     BuildGridMesh();
