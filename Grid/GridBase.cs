@@ -6,7 +6,6 @@ namespace Darkan.Grid
     using TMPro;
     using UnityEngine;
 
-    [ExecuteAlways]
     [Searchable]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
     public abstract class GridBase<TCell> : SerializedMonoBehaviour
@@ -51,13 +50,12 @@ namespace Darkan.Grid
         protected TCell[,] Grid => _grid;
         protected Transform Transform => _transform;
 
-        [ShowInInspector, Sirenix.OdinInspector.ReadOnly]
+        [ShowInInspector, ReadOnly]
         [InlineEditor(InlineEditorObjectFieldModes.Boxed, DrawPreview = true, PreviewAlignment = PreviewAlignment.Bottom, PreviewHeight = 150, Expanded = false)]
         Mesh _gridMesh;
         Transform _transform;
         TextMeshPro[,] _textGrid;
         TCell[,] _grid;
-
 
         protected virtual void Awake()
         {
@@ -70,10 +68,7 @@ namespace Darkan.Grid
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
-            if (Application.isPlaying)
-            {
-                BuildGrid();
-            }
+            BuildGrid();
         }
 
         protected virtual void Start()
@@ -81,23 +76,16 @@ namespace Darkan.Grid
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
-            if (Application.isPlaying)
+            if (_displayGridIngame)
             {
-                if (_displayGridIngame)
-                {
-                    BuildGridMesh();
-                    CreateDebugCellText();
-                }
-                else
-                {
-                    ClearTextGrid();
-                    if (_gridMesh != null)
-                        _gridMesh.Clear();
-                }
+                BuildGridMesh();
+                CreateDebugCellText();
             }
             else
             {
-                BuildGridMesh();
+                ClearTextGrid();
+                if (_gridMesh != null)
+                    _gridMesh.Clear();
             }
         }
 
