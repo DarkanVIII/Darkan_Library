@@ -66,6 +66,14 @@ namespace Darkan.Grid
             _gridMesh = GetComponent<MeshFilter>().sharedMesh;
 
             GetComponent<MeshCollider>().sharedMesh = _gridMesh;
+
+            if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
+            if (_cellSize <= 0) return;
+
+            if (Application.isPlaying)
+            {
+                BuildGrid();
+            }
         }
 
         protected virtual void Start()
@@ -75,8 +83,6 @@ namespace Darkan.Grid
 
             if (Application.isPlaying)
             {
-                BuildGrid();
-
                 if (_displayGridIngame)
                 {
                     BuildGridMesh();
