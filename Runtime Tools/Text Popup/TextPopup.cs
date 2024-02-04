@@ -7,10 +7,11 @@ namespace Darkan.RuntimeTools
 
     public class TextPopup : MonoBehaviour
     {
-        public void Init(Action onComplete, Transform origin)
+        public void Init(Action<TextPopup> onComplete, Transform origin, Transform lookAtTarget)
         {
             _onComplete = onComplete;
             _origin = origin;
+            _lookAtTarget = lookAtTarget;
 
             Vector3 startPosition = _origin.position;
             _lastStartPos = startPosition;
@@ -29,7 +30,32 @@ namespace Darkan.RuntimeTools
                 .SetAutoKill(false)
                 .Pause()
                 .SetDelay(_currPopupParams.Duration - _currPopupParams.FadeTime)
-                .OnComplete(() => _onComplete.Invoke());
+                .OnComplete(() => _onComplete.Invoke(this));
+        }
+
+        public void Init(Action<TextPopup> onComplete, Transform lookAtTarget)
+        {
+            _onComplete = onComplete;
+            _lookAtTarget = lookAtTarget;
+
+            Vector3 startPosition = Vector3.zero;
+            _lastStartPos = startPosition;
+            _yPositionTweener = DOTween.To(() => startPosition, x => transform.position = x,
+                 startPosition + _currPopupParams.Distance, _currPopupParams.Duration)
+                 .SetAutoKill(false)
+                 .Pause()
+                 .SetEase(Ease.OutCubic);
+
+            _fadeInTweener = DOTween.To(() => 0f, x => _textMesh.alpha = x, 1f, _currPopupParams.FadeTime)
+                .SetAutoKill(false)
+                .Pause()
+                .SetEase(Ease.InCubic);
+
+            _fadeOutTweener = DOTween.To(() => 1f, x => _textMesh.alpha = x, 0f, _currPopupParams.FadeTime)
+                .SetAutoKill(false)
+                .Pause()
+                .SetDelay(_currPopupParams.Duration - _currPopupParams.FadeTime)
+                .OnComplete(() => _onComplete.Invoke(this));
         }
 
         static readonly Vector3 ROTATE_Y_180 = new(0, 180, 0);
@@ -44,7 +70,8 @@ namespace Darkan.RuntimeTools
 
         TextPopupParams _currPopupParams = TextPopupParams.BasicWhite;
 
-        Action _onComplete;
+        Action<TextPopup> _onComplete;
+        Transform _lookAtTarget;
 
         void Awake()
         {
@@ -54,7 +81,9 @@ namespace Darkan.RuntimeTools
 
         void Update()
         {
-            transform.LookAt(GameHelper.MainCamera.transform.position);
+            if (_lookAtTarget == null) return;
+
+            transform.LookAt(_lookAtTarget.position);
             transform.Rotate(ROTATE_Y_180);
         }
 
@@ -65,7 +94,7 @@ namespace Darkan.RuntimeTools
             _fadeInTweener.Restart();
         }
 
-        public void ChangePopupParams(TextPopupParams popupParams)
+        public TextPopup ChangePopupParams(TextPopupParams popupParams)
         {
             _textMesh.text = popupParams.Text;
             _textMesh.color = popupParams.Color;
@@ -90,6 +119,8 @@ namespace Darkan.RuntimeTools
 
             _currPopupParams = popupParams;
             _lastStartPos = _origin.position;
+
+            return this;
         }
 
         void OnDestroy()

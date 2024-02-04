@@ -14,6 +14,7 @@ namespace Darkan.RuntimeTools
             Distance = paramPreset.Distance;
             FadeTime = paramPreset.FadeTime;
             FontSize = paramPreset.FontSize;
+            StartPos = paramPreset.StartPos;
         }
 
         [HideInInspector]
@@ -23,6 +24,7 @@ namespace Darkan.RuntimeTools
         public Vector3 Distance;
         public float FadeTime;
         public float FontSize;
+        public Vector3 StartPos;
 
         public static TextPopupParams BasicWhite
         {

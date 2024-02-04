@@ -1,5 +1,6 @@
 namespace Darkan.RuntimeTools
 {
+    using Darkan.Pooling;
     using Sirenix.OdinInspector;
     using System.Collections.Generic;
     using UnityEngine;
@@ -9,56 +10,49 @@ namespace Darkan.RuntimeTools
         [SerializeField]
         [Required]
         Transform _textPopupPrefab;
+
         [SerializeField]
-        [Tooltip("Uses this transform if left empty")]
-        Transform _origin;
+        [Tooltip("Optional")]
+        Transform _lookAtTarget;
 
-        readonly Queue<TextPopupParams> _queuedParams = new();
-
-        int _popupsToSpawn;
-        TextPopup _cachedPopup;
+        ObjectPooler<TextPopup> _popupPooler;
 
         void Awake()
         {
-            if (_origin == null) _origin = transform;
-
-            CreatePopup();
+            _popupPooler = new ObjectPooler<TextPopup>(OnCreate, OnRelease, OnGet, null, 5);
         }
 
-        /// <summary>
-        ///Has little to no allocation, except when changing params a lot
-        /// </summary>
+        #region Object Pooling
+
+        TextPopup OnCreate()
+        {
+            TextPopup popup = Instantiate(_textPopupPrefab).GetComponent<TextPopup>();
+            popup.Init(OnCompletedPopup, _lookAtTarget);
+            popup.gameObject.SetActive(false);
+
+            return popup;
+        }
+
+        void OnRelease(TextPopup popup)
+        {
+            popup.gameObject.SetActive(false);
+        }
+
+        void OnGet(TextPopup popup)
+        {
+            popup.gameObject.SetActive(true);
+        }
+
+        #endregion
+
         public void SpawnPopup(TextPopupParams popupParams)
         {
-            _popupsToSpawn++;
-            _queuedParams.Enqueue(popupParams);
-
-            if (_popupsToSpawn == 1)
-                PlayNextPopup();
+            _popupPooler.Get().ChangePopupParams(popupParams).Play();
         }
 
-        void CreatePopup()
+        void OnCompletedPopup(TextPopup popup)
         {
-            _cachedPopup = Instantiate(_textPopupPrefab).GetComponent<TextPopup>();
-            _cachedPopup.Init(OnCompletedPopup, _origin);
-            _cachedPopup.gameObject.SetActive(false);
-        }
-
-        void OnCompletedPopup()
-        {
-            _popupsToSpawn--;
-
-            if (_popupsToSpawn > 0)
-                PlayNextPopup();
-            else
-                _cachedPopup.gameObject.SetActive(false);
-        }
-
-        void PlayNextPopup()
-        {
-            _cachedPopup.gameObject.SetActive(true);
-            _cachedPopup.ChangePopupParams(_queuedParams.Dequeue());
-            _cachedPopup.Play();
+            _popupPooler.Release(popup);
         }
     }
 }
