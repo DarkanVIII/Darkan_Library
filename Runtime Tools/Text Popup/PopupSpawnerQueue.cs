@@ -4,7 +4,7 @@ namespace Darkan.RuntimeTools
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class PopupSpawnerQueue : SerializedMonoBehaviour
+    public class PopupSpawnerQueue : MonoBehaviour
     {
         [SerializeField]
         [Required]

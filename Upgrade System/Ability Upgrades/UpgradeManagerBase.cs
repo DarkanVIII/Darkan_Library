@@ -4,7 +4,7 @@ namespace Darkan.UpgradeSystem.Ability
     using System.Collections.Generic;
     using UnityEngine;
 
-    public abstract class UpgradeManagerBase<TAbility> : SerializedMonoBehaviour where TAbility : System.Enum
+    public abstract class UpgradeManagerBase<TAbility> : MonoBehaviour where TAbility : System.Enum
     {
         [SerializeField] UpgradeDataBase<TAbility> _upgradeData;
         [SerializeField] Canvas _upgradeCanvas;

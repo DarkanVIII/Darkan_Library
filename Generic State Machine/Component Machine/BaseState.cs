@@ -1,10 +1,14 @@
 namespace Darkan.StateMachine.Component
 {
-    using Sirenix.OdinInspector;
     using UnityEngine;
 
-    public abstract class BaseState<TEnum, TMachine> : SerializedMonoBehaviour where TEnum : System.Enum where TMachine : StateMachine<TEnum, TMachine>
+    public abstract class BaseState<TEnum, TMachine> : MonoBehaviour where TEnum : System.Enum where TMachine : StateMachine<TEnum, TMachine>
     {
+        [SerializeField]
+        TEnum _state;
+
+        public TEnum State => _state;
+
 #if !RELEASE
         protected TMachine StateMachine { get; private set; }
 #else

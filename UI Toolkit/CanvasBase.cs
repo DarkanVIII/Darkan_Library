@@ -6,7 +6,7 @@ namespace Darkan.UI
     using UnityEngine.UIElements;
 
     [ExecuteAlways]
-    public abstract class CanvasBase : SerializedMonoBehaviour
+    public abstract class CanvasBase : MonoBehaviour
     {
         [SerializeField] UIDocument _uiDocument;
 

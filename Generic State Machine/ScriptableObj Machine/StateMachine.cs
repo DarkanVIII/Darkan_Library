@@ -5,57 +5,53 @@ namespace Darkan.StateMachine.Scriptable
     using System.Collections.Generic;
     using UnityEngine;
 
-    /// <summary>
-    /// To use: <br/>
-    /// 1. Create and derive a State Manager from this and create a State Enum in it <br/>
-    /// 2. Create and derive States from <see cref="BaseState{TEnum, TManager}"/> <br/>
-    /// 3. Add AssetMenu Attribute to each Base State and create a Scriptable Objects of each State
-    /// 4. Add State Objects to Dictionary of State Manager
-    /// 5. Set Active State in Awake -> Starting State (Will pick randomly if not set to avoid Errors) <br/>
-    /// To use Unity Messages like Update and OnTriggerEnter -> For Example add in State Manager : Update { ActiveState.Update }
-    /// </summary>
-    public abstract class StateMachine<TEnum, TMachine> : SerializedMonoBehaviour where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
+    public abstract class StateMachine<TEnum, TMachine> : MonoBehaviour where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
     {
+        [Required]
+        [SerializeField]
+        StatesData<TEnum, TMachine> _statesData;
+
         public event Action<TEnum> OnStateChanged;
 
-        [SerializeField]
         protected Dictionary<TEnum, BaseState<TEnum, TMachine>> StatesDictionary = new();
 
         [ShowInInspector]
         [ReadOnly]
-        protected BaseState<TEnum, TMachine> ActiveState;
+        protected BaseState<TEnum, TMachine> ActiveStateScriptable;
 
         protected virtual void Awake()
         {
-            foreach (var keyValuePair in StatesDictionary)
+            if (_statesData == null)
             {
-                keyValuePair.Value.Init((TMachine)this);
-                keyValuePair.Value.AwakeState();
+                enabled = false;
+                return;
             }
+
+            StatesDictionary = _statesData.StatesDictionary;
         }
 
         protected virtual void Start()
         {
-            ActiveState = StatesDictionary[SetEntryState()];
-            ActiveState.EnterState();
+            ActiveStateScriptable = StatesDictionary[SetEntryState()];
+            ActiveStateScriptable.EnterState();
         }
 
         public abstract TEnum SetEntryState();
 
         public void TransitionToState(TEnum nextState)
         {
-            ActiveState.ExitState();
+            ActiveStateScriptable.ExitState();
 
-            ActiveState = StatesDictionary[nextState];
+            ActiveStateScriptable = StatesDictionary[nextState];
 
-            ActiveState.EnterState();
+            ActiveStateScriptable.EnterState();
 
             OnStateChanged?.Invoke(nextState);
         }
 
         void OnApplicationQuit()
         {
-            ActiveState.ExitState();
+            ActiveStateScriptable.ExitState();
         }
     }
 }

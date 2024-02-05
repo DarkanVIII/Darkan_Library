@@ -5,7 +5,7 @@ namespace Darkan.FieldOfView
     using UnityEngine;
 
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    public class FieldOfView : SerializedMonoBehaviour
+    public class FieldOfView : MonoBehaviour
     {
         [SerializeField]
         [Tooltip("Layers to check for obstacles")]

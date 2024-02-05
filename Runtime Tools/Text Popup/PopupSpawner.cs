@@ -2,10 +2,9 @@ namespace Darkan.RuntimeTools
 {
     using Darkan.Pooling;
     using Sirenix.OdinInspector;
-    using System.Collections.Generic;
     using UnityEngine;
 
-    public class PopupSpawner : SerializedMonoBehaviour
+    public class PopupSpawner : MonoBehaviour
     {
         [SerializeField]
         [Required]

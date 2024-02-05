@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(RectTransform))]
-public class LayoutFitter : SerializedMonoBehaviour
+public class LayoutFitter : MonoBehaviour
 {
     #region Grid
     enum BuildType { Rows, Columns };
