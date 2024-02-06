@@ -7,6 +7,7 @@ namespace Darkan.Grid
     using UnityEngine;
 
     [Searchable]
+    [ExecuteAlways]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
     public abstract class GridBase<TCell> : MonoBehaviour
     {
@@ -62,13 +63,6 @@ namespace Darkan.Grid
             _transform = GetComponent<Transform>();
             GridLayer = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
             _gridMesh = GetComponent<MeshFilter>().sharedMesh;
-
-            GetComponent<MeshCollider>().sharedMesh = _gridMesh;
-
-            if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
-            if (_cellSize <= 0) return;
-
-            BuildGrid();
         }
 
         protected virtual void Start()
@@ -76,16 +70,20 @@ namespace Darkan.Grid
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
-            if (_displayGridIngame)
+
+            if (Application.isPlaying)
             {
-                BuildGridMesh();
-                CreateDebugCellText();
+                BuildGrid();
+
+                if (_displayGridIngame)
+                {
+                    BuildGridMesh();
+                    CreateDebugCellText();
+                }
             }
             else
             {
-                ClearTextGrid();
-                if (_gridMesh != null)
-                    _gridMesh.Clear();
+                BuildGridMesh();
             }
         }
 
@@ -102,7 +100,6 @@ namespace Darkan.Grid
                 if (_displayGridIngame)
                 {
                     BuildGridMesh();
-                    CreateDebugCellText();
                 }
             }
             else
