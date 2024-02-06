@@ -74,6 +74,7 @@ namespace Darkan.Grid
             if (Application.isPlaying)
             {
                 BuildGrid();
+                GetComponent<MeshCollider>().sharedMesh = _gridMesh;
 
                 if (_displayGridIngame)
                 {
