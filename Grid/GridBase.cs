@@ -70,16 +70,19 @@ namespace Darkan.Grid
             if (_gridSize.x <= 0 || _gridSize.y <= 0) return;
             if (_cellSize <= 0) return;
 
-
             if (Application.isPlaying)
             {
                 BuildGrid();
-                GetComponent<MeshCollider>().sharedMesh = _gridMesh;
 
                 if (_displayGridIngame)
                 {
                     BuildGridMesh();
+                    GetComponent<MeshCollider>().sharedMesh = _gridMesh;
                     CreateDebugCellText();
+                }
+                else
+                {
+                    _gridMesh.Clear();
                 }
             }
             else
@@ -215,10 +218,6 @@ namespace Darkan.Grid
         {
             if (_gridMesh != null)
                 _gridMesh.Clear();
-            else
-            {
-                _gridMesh = new();
-            }
 
             Vector3[] vertices = new Vector3[4 * _gridSize.x * _gridSize.y];
             Vector2[] uvs = new Vector2[vertices.Length];
