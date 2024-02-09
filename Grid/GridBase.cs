@@ -218,6 +218,8 @@ namespace Darkan.Grid
         {
             if (_gridMesh != null)
                 _gridMesh.Clear();
+            else
+                _gridMesh = new();
 
             Vector3[] vertices = new Vector3[4 * _gridSize.x * _gridSize.y];
             Vector2[] uvs = new Vector2[vertices.Length];
