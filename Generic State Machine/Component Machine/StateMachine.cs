@@ -9,7 +9,7 @@ namespace Darkan.StateMachine.Component
     {
         public event Action<TEnum> OnStateChanged;
 
-        protected Dictionary<TEnum, BaseState<TEnum, TMachine>> StatesDictionary = new();
+        protected Dictionary<TEnum, StateBase<TEnum, TMachine>> StatesDictionary = new();
 
         [ShowInInspector]
         [ReadOnly]
@@ -17,17 +17,18 @@ namespace Darkan.StateMachine.Component
 
         [ShowInInspector]
         [ReadOnly]
-        protected BaseState<TEnum, TMachine> ActiveStateComponent;
+        protected StateBase<TEnum, TMachine> ActiveStateComponent;
 
         protected virtual void Awake()
         {
-            BaseState<TEnum, TMachine>[] states = GetComponents<BaseState<TEnum, TMachine>>();
+            var states = GetComponents<StateBase<TEnum, TMachine>>();
 
-            foreach (BaseState<TEnum, TMachine> state in states)
+            foreach (StateBase<TEnum, TMachine> state in states)
             {
                 StatesDictionary.Add(state.State, state);
 
                 state.Init((TMachine)this);
+                state.enabled = false;
             }
         }
 
@@ -54,11 +55,6 @@ namespace Darkan.StateMachine.Component
             ActiveStateComponent.enabled = true;
 
             OnStateChanged?.Invoke(nextState);
-        }
-
-        void OnApplicationQuit()
-        {
-            ActiveStateComponent.ExitState();
         }
     }
 }

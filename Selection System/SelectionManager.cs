@@ -13,6 +13,8 @@ namespace Darkan.Selection
         enum RaycastOptions { Only2D, Only3D, Both }
         enum CollisionCheckOptions { ColliderObject, RigidbodyObject, Both }
 
+        [Title("General")]
+
         [SerializeField]
         RaycastOptions _raycastOptions = RaycastOptions.Both;
 
@@ -20,7 +22,7 @@ namespace Darkan.Selection
         [Tooltip("Marks objects (IMarkable) inside the selection box while dragging.")]
         bool _useMarking;
 
-        [Title("Performance Options")]
+        [Title("Performance")]
 
         [SerializeField]
         [Tooltip("Improve performance by only checking the relevant layers.")]

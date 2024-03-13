@@ -2,7 +2,7 @@ namespace Darkan.StateMachine.Component
 {
     using UnityEngine;
 
-    public abstract class BaseState<TEnum, TMachine> : MonoBehaviour where TEnum : System.Enum where TMachine : StateMachine<TEnum, TMachine>
+    public abstract class StateBase<TEnum, TMachine> : MonoBehaviour where TEnum : System.Enum where TMachine : StateMachine<TEnum, TMachine>
     {
         [SerializeField]
         TEnum _state;
@@ -20,15 +20,8 @@ namespace Darkan.StateMachine.Component
             StateMachine = stateMachine;
         }
 
-        protected virtual void Awake()
-        {
-            enabled = false;
-        }
-
         public abstract void EnterState();
-        /// <summary>
-        /// Called OnApplicationQuit too to unsubscribe from possible events
-        /// </summary>
+
         public abstract void ExitState();
     }
 }
