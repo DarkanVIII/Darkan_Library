@@ -51,10 +51,10 @@ namespace Darkan.StateMachine.Component
 
             ActiveStateComponent = StatesDictionary[nextState];
 
+            OnStateChanged?.Invoke(nextState);
+
             ActiveStateComponent.EnterState();
             ActiveStateComponent.enabled = true;
-
-            OnStateChanged?.Invoke(nextState);
         }
     }
 }
