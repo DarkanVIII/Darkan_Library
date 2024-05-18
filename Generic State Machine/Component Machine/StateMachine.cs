@@ -36,12 +36,13 @@ namespace Darkan.StateMachine.Component
         {
             TEnum entryState = SetEntryState();
 
-            if (entryState == null) return;
-
-            ActiveStateComponent = StatesDictionary[entryState];
-            ActiveStateComponent.EnterState();
-            ActiveStateComponent.enabled = true;
-            OnStateChanged?.Invoke(entryState);
+            if (StatesDictionary.TryGetValue(entryState, out var state))
+            {
+                ActiveStateComponent = state;
+                OnStateChanged?.Invoke(entryState);
+                ActiveStateComponent.EnterState();
+                ActiveStateComponent.enabled = true;
+            }
         }
 
         public abstract TEnum SetEntryState();
@@ -54,12 +55,14 @@ namespace Darkan.StateMachine.Component
                 ActiveStateComponent.enabled = false;
             }
 
-            ActiveStateComponent = StatesDictionary[nextState];
+            if (StatesDictionary.TryGetValue(nextState, out var state))
+            {
+                ActiveStateComponent = state;
+                OnStateChanged?.Invoke(nextState);
 
-            OnStateChanged?.Invoke(nextState);
-
-            ActiveStateComponent.EnterState();
-            ActiveStateComponent.enabled = true;
+                ActiveStateComponent.EnterState();
+                ActiveStateComponent.enabled = true;
+            }
         }
     }
 }
