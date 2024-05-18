@@ -44,9 +44,9 @@ namespace Darkan.StateMachine.Scriptable
 
             ActiveStateScriptable = StatesDictionary[nextState];
 
-            ActiveStateScriptable.EnterState();
-
             OnStateChanged?.Invoke(nextState);
+
+            ActiveStateScriptable.EnterState();
         }
 
         void OnApplicationQuit()

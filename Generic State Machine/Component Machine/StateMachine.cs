@@ -36,6 +36,8 @@ namespace Darkan.StateMachine.Component
         {
             TEnum entryState = SetEntryState();
 
+            if (entryState == null) return;
+
             ActiveStateComponent = StatesDictionary[entryState];
             ActiveStateComponent.EnterState();
             ActiveStateComponent.enabled = true;
@@ -46,8 +48,11 @@ namespace Darkan.StateMachine.Component
 
         public void TransitionToState(TEnum nextState)
         {
-            ActiveStateComponent.ExitState();
-            ActiveStateComponent.enabled = false;
+            if (ActiveStateComponent != null)
+            {
+                ActiveStateComponent.ExitState();
+                ActiveStateComponent.enabled = false;
+            }
 
             ActiveStateComponent = StatesDictionary[nextState];
 
