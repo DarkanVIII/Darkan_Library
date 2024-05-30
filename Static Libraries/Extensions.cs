@@ -33,10 +33,10 @@ namespace Darkan.Helpers
             return list;
         }
 
-        /// <returns>The world position of the RectTransform using the Main Camera</returns>
-        public static Vector3 WorldPosition(this RectTransform rectTrans)
+        /// <returns>The world position of the RectTransform relative to the Camera</returns>
+        public static Vector3 WorldPosition(this RectTransform rectTrans, Camera camera)
         {
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTrans, rectTrans.position, GameHelper.MainCamera, out Vector3 result);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTrans, rectTrans.position, camera, out Vector3 result);
             return result;
         }
     }

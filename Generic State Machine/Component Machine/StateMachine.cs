@@ -39,9 +39,10 @@ namespace Darkan.StateMachine.Component
             if (StatesDictionary.TryGetValue(entryState, out var state))
             {
                 ActiveStateComponent = state;
-                OnStateChanged?.Invoke(entryState);
                 ActiveStateComponent.EnterState();
                 ActiveStateComponent.enabled = true;
+
+                OnStateChanged?.Invoke(entryState);
             }
         }
 
@@ -58,10 +59,10 @@ namespace Darkan.StateMachine.Component
             if (StatesDictionary.TryGetValue(nextState, out var state))
             {
                 ActiveStateComponent = state;
-                OnStateChanged?.Invoke(nextState);
-
                 ActiveStateComponent.EnterState();
                 ActiveStateComponent.enabled = true;
+
+                OnStateChanged?.Invoke(nextState);
             }
         }
     }
