@@ -18,6 +18,11 @@ namespace Darkan.Helpers
             return divident / divisor * floating;
         }
 
+        public static bool Contains(this LayerMask layerMask, int layer)
+        {
+            return (layerMask & (1 << layer)) != 0;
+        }
+
         /// <summary>
         /// Shuffles a list. Good performance. Meh randomness.
         /// </summary>
