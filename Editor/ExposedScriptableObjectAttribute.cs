@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Darkan
+namespace Darkan.Editor
 {
     [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public class ExposedScriptableObjectAttribute : PropertyAttribute
@@ -12,7 +12,7 @@ namespace Darkan
     [CustomPropertyDrawer(typeof(ExposedScriptableObjectAttribute))]
     public class ExposedScriptableObjectAttributeDrawer : PropertyDrawer
     {
-        Editor _editor = null;
+        UnityEditor.Editor _editor = null;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -38,7 +38,7 @@ namespace Darkan
 
                 if (!_editor)
                 {
-                    Editor.CreateCachedEditor(property.objectReferenceValue, null, ref _editor);
+                    UnityEditor.Editor.CreateCachedEditor(property.objectReferenceValue, null, ref _editor);
                 }
 
                 _editor.OnInspectorGUI();
