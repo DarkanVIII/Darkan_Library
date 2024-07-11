@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Darkan.Pooling
 {
-    public class PrefabPooler<T> where T : MonoBehaviour
+    public class PrefabPooler<T> where T : UnityEngine.Object
     {
         readonly Stack<T> _stack;
 
