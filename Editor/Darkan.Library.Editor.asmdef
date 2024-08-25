@@ -1,7 +1,9 @@
 {
     "name": "Darkan.Library.Editor",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:2d9150e1c38715940ba833f102b14c13"
+    ],
     "includePlatforms": [
         "Editor"
     ],

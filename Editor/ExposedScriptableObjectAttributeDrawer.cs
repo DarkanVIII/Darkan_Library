@@ -1,13 +1,10 @@
+// Author: DarkanVIII
+
 using UnityEditor;
 using UnityEngine;
 
 namespace Darkan.Editor
 {
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-    public class ExposedScriptableObjectAttribute : PropertyAttribute
-    {
-
-    }
 
     [CustomPropertyDrawer(typeof(ExposedScriptableObjectAttribute))]
     public class ExposedScriptableObjectAttributeDrawer : PropertyDrawer
