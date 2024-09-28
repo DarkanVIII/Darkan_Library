@@ -44,6 +44,11 @@ namespace Darkan.Helpers
             RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTrans, rectTrans.position, camera, out Vector3 result);
             return result;
         }
+
+        public static Color SetAlpha(this Color thisColor, float alpha)
+        {
+            return new Color(thisColor.r, thisColor.g, thisColor.b, alpha);
+        }
     }
 }
 
