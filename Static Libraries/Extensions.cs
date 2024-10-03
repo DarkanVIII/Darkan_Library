@@ -47,7 +47,8 @@ namespace Darkan.Helpers
 
         public static Color SetAlpha(this Color thisColor, float alpha)
         {
-            return new Color(thisColor.r, thisColor.g, thisColor.b, alpha);
+            thisColor.a = alpha;
+            return thisColor;
         }
     }
 }
