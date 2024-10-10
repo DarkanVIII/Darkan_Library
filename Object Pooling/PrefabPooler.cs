@@ -8,7 +8,7 @@ namespace Darkan.Pooling
     {
         readonly Stack<T> _stack;
 
-        readonly Func<T, T> _createFunc;
+        readonly Func<T, PrefabPooler<T>, T> _createFunc;
 
         readonly Action<T> _actionOnGet;
 
@@ -28,7 +28,7 @@ namespace Darkan.Pooling
 
         public int CountInactive => _stack.Count;
 
-        public PrefabPooler(T prefab, Func<T, T> createFunc, Action<T> actionOnRelease, Action<T> actionOnGet = null, Action<T> actionOnDestroy = null,
+        public PrefabPooler(T prefab, Func<T, PrefabPooler<T>, T> createFunc, Action<T> actionOnRelease, Action<T> actionOnGet = null, Action<T> actionOnDestroy = null,
              ushort prefillAmount = 0, ushort defaultCapacity = 25)
         {
             _stack = new Stack<T>(defaultCapacity);
@@ -46,7 +46,7 @@ namespace Darkan.Pooling
         {
             for (int i = 1; i <= amount; i++)
             {
-                T obj = _createFunc(_prefab);
+                T obj = _createFunc(_prefab, this);
                 _actionOnRelease?.Invoke(obj);
                 _stack.Push(obj);
                 CountAll++;
@@ -58,7 +58,7 @@ namespace Darkan.Pooling
             T obj;
             if (_stack.Count == 0)
             {
-                obj = _createFunc(_prefab);
+                obj = _createFunc(_prefab, this);
                 CountAll++;
             }
             else
