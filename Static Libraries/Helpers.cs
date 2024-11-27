@@ -1,10 +1,8 @@
 namespace Darkan.Helpers
 {
     using System.Collections.Generic;
-    using TMPro;
-    using UnityEngine;
 
-    public static class HelperFunctions
+    public static class Helpers
     {
         /// <summary>Invoke every second, or when necessary, for better performance</summary>
         /// <returns>String in format mm:ss with m and s rounded down</returns>

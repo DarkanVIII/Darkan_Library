@@ -1,6 +1,6 @@
 using UnityEngine.UIElements;
 
-namespace Darkan.UI
+namespace Darkan.Helpers
 {
     public static class UIExtensions
     {

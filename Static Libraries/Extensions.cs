@@ -6,20 +6,6 @@ namespace Darkan.Helpers
 
     public static class Extensions
     {
-        /// <returns>Integer with the provided ratio as percentage</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ApplyPercent(this int integer, int divident, int divisor)
-        {
-            return System.Convert.ToInt32((float)divident / divisor * integer);
-        }
-
-        /// <returns>Float with the provided ratio as percentage</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float ApplyPercent(this float floating, int divident, int divisor)
-        {
-            return divident / divisor * floating;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Contains(this LayerMask layerMask, int layer)
         {
@@ -57,38 +43,34 @@ namespace Darkan.Helpers
             return thisColor;
         }
 
-        /// <summary>
-        /// Returns a Vector2 with the x and z components of the Vector3 and normalized
-        /// </summary>
+        /// <returns>Returns a Vector2 with the x and z components of the Vector3 and normalized</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 FlatVec2Normalized(this Vector3 vector3)
+        public static Vector2 FlatVec2Normal(this Vector3 vector3)
         {
             return new Vector2(vector3.x, vector3.z).normalized;
         }
 
-        /// <summary>
-        /// Returns the input Vector with y = 0 and normalized
-        /// </summary>
+        /// <returns>Returns the input Vector with y = 0 and normalized</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 FlatNormalized(this Vector3 vector3)
+        public static Vector3 FlatNormal(this Vector3 vector3)
         {
             return new Vector3(vector3.x, 0, vector3.z).normalized;
         }
 
-        /// <summary>
-        /// Returns the input Vector with y = 0 and the original magnitude
-        /// </summary>
+        /// <returns>
+        /// the input Vector with y = 0 and the original magnitude
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Flat(this Vector3 vector3)
         {
             float magnitude = vector3.magnitude;
-            vector3 = FlatNormalized(vector3);
+            vector3 = FlatNormal(vector3);
             return vector3 * magnitude;
         }
 
-        /// <summary>
-        /// Returns the input Vector with y = 0 and the original x and z
-        /// </summary>
+        /// <returns>
+        /// the input Vector with y = 0 and the original x and z
+        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 FlatPos(this Vector3 vector3)
         {
@@ -96,29 +78,16 @@ namespace Darkan.Helpers
             return vector3;
         }
 
-        /// <summary>
-        /// Value is clamped to a min value
-        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampMin(this float input, float minValue)
         {
-            if (input < minValue)
-                return minValue;
-
-            return input;
+            return input < minValue ? minValue : input;
         }
 
-        /// <summary>
-        /// Value is clamped to a min value
-        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ClampMin(this int input, int minValue)
         {
-            if (input < minValue)
-                return minValue;
-
-            return input;
+            return input < minValue ? minValue : input;
         }
     }
 }
-
