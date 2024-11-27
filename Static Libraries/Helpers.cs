@@ -1,9 +1,26 @@
 namespace Darkan.Helpers
 {
     using System.Collections.Generic;
+    using UnityEngine;
 
     public static class Helpers
     {
+        static readonly Dictionary<float, WaitForSeconds> _waitDict = new();
+
+        /// <summary>
+        /// Caches each WaitForSeconds to reduce allocations.<br/>
+        /// Only use when using the same or very limited time values with each call to keep dictionary size small.
+        /// </summary>
+        /// <returns>Cached WaitForSeconds with the specified time</returns>
+        public static WaitForSeconds GetWaitForSeconds(float seconds)
+        {
+            if (_waitDict.TryGetValue(seconds, out WaitForSeconds wait)) return wait;
+
+            wait = new(seconds);
+            _waitDict[seconds] = wait;
+            return wait;
+        }
+
         /// <summary>Invoke every second, or when necessary, for better performance</summary>
         /// <returns>String in format mm:ss with m and s rounded down</returns>
         public static string GetTimerString(float timerInSec)
