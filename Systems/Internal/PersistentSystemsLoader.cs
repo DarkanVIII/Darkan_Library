@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Darkan.Internal
+namespace Darkan.Systems.Internal
 {
     internal class PersistentSystemsLoader : Object
     {

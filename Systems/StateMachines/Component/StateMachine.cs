@@ -1,9 +1,10 @@
-namespace Darkan.StateMachine.Component
+using Sirenix.OdinInspector;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Darkan.Systems.StateMachine.Component
 {
-    using Sirenix.OdinInspector;
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
 
     public abstract class StateMachine<TEnum, TMachine> : MonoBehaviour where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
     {

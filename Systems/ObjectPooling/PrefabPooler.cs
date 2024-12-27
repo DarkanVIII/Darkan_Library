@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Darkan.Pooling
+namespace Darkan.Systems.Pooling
 {
     public class PrefabPooler<T> where T : UnityEngine.Object
     {

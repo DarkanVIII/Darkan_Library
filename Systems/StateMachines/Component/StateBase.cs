@@ -1,7 +1,8 @@
-namespace Darkan.StateMachine.Component
-{
-    using UnityEngine;
+using UnityEngine;
 
+
+namespace Darkan.Systems.StateMachine.Component
+{
     public abstract class StateBase<TEnum, TMachine> : MonoBehaviour where TEnum : System.Enum where TMachine : StateMachine<TEnum, TMachine>
     {
         [SerializeField]

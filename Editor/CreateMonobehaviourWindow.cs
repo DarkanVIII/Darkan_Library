@@ -1,10 +1,10 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
 namespace Darkan.Editor
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using UnityEditor;
-    using UnityEngine;
-
     public class CreateMonobehaviourWindow : EditorWindow
     {
         const string DEFAULT_NAME = "Monobehaviour";
@@ -15,7 +15,7 @@ namespace Darkan.Editor
         int _numOfScripts = 1;
         readonly static List<string> _inputStrings = new();
 
-        [MenuItem("Assets/CreateMonobehaviours %g", priority = 3)]
+        [MenuItem("Assets/CreateMonobehaviours %m", priority = 1000)]
         public static void ShowWindow()
         {
             Object selectedObject = Selection.activeObject;

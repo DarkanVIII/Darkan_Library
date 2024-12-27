@@ -1,9 +1,9 @@
-namespace Darkan.Helpers
-{
-    using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
-    using UnityEngine;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
+namespace Darkan.Utilities
+{
     public static class Extensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

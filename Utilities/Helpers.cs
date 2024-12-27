@@ -1,17 +1,16 @@
-namespace Darkan.Helpers
-{
-    using System.Collections.Generic;
-    using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
+namespace Darkan.Utilities
+{
     public static class Helpers
     {
         static readonly Dictionary<float, WaitForSeconds> _waitDict = new();
 
         /// <summary>
         /// Caches each WaitForSeconds to reduce allocations.<br/>
-        /// Only use when using the same or very limited time values with each call to keep dictionary size small.
-        /// </summary>
-        /// <returns>Cached WaitForSeconds with the specified time</returns>
+        /// Only use when using the same or very limited time values with each call to 
+        /// keep internal dictionary size small.
         public static WaitForSeconds GetWaitForSeconds(float seconds)
         {
             if (_waitDict.TryGetValue(seconds, out WaitForSeconds wait)) return wait;
@@ -19,6 +18,12 @@ namespace Darkan.Helpers
             wait = new(seconds);
             _waitDict[seconds] = wait;
             return wait;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ClearWaitDictionary()
+        {
+            _waitDict.Clear();
         }
 
         /// <summary>Invoke every second, or when necessary, for better performance</summary>
@@ -31,11 +36,8 @@ namespace Darkan.Helpers
             return (minutes * 100 + seconds).ToString("00:00");
         }
 
-        /// <summary>
-        /// Divide a vector into equal parts. Non alloc.
-        /// </summary>
-        /// <returns>A list with all parts, set off by startpos and distance.</returns>
-        public static void DivideVectorIntoEqualParts(float startPos, float distance, int parts, List<float> result)
+        /// <returns>A list with all parts</returns>
+        public static void DivideVectorIntoEqualParts(float origin, float distance, int parts, List<float> result)
         {
             result.Clear();
 
@@ -43,7 +45,7 @@ namespace Darkan.Helpers
 
             for (int i = 0; i < parts; i++)
             {
-                result.Add(startPos + i * partSize);
+                result.Add(origin + i * partSize);
             }
         }
     }

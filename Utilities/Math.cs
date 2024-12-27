@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Darkan.Math
+namespace Darkan.Utilities
 {
     public struct MathD
     {
