@@ -5,56 +5,69 @@ using UnityEngine;
 
 namespace Darkan.Systems.StateMachine.Component.New
 {
-    public abstract class StateMachine<T> : MonoBehaviour where T : StateMachine<T>
+    public abstract class StateMachine<TEnum> : MonoBehaviour where TEnum : Enum
     {
-        public event Action<MonoBehaviour> OnStateChanged;
+        public event Action<TEnum> OnStateChanged;
 
-        readonly Dictionary<Type, MonoBehaviour> _states = new();
+        protected Dictionary<TEnum, MonoBehaviour> _componentDictionary = new();
 
-        [ShowInInspector, ReadOnly]
-        protected MonoBehaviour _activeState;
+        [ShowInInspector]
+        [ReadOnly]
+        public TEnum ActiveStateType => _activeState != null ? _activeState.StateType : default;
 
-        public void SetEntryState<State>() where State : MonoBehaviour, IState<T>
+        [ShowInInspector]
+        [ReadOnly]
+        public MonoBehaviour ActiveStateComponent;
+
+        IState<StateMachine<TEnum>, TEnum> _activeState;
+
+        protected virtual void Awake()
         {
-            if (_activeState != null) return;
+            MonoBehaviour[] components = GetComponents<MonoBehaviour>();
 
-            if (!_states.TryGetValue(typeof(State), out MonoBehaviour state))
-                state = CreateNewStateInstance<State>();
-
-            _activeState = state;
-
-            ((IState<T>)_activeState).Enter();
-            _activeState.enabled = true;
-
-            OnStateChanged?.Invoke(_activeState);
+            foreach (MonoBehaviour component in components)
+            {
+                if (component is IState<StateMachine<TEnum>, TEnum> iState)
+                {
+                    component.enabled = false;
+                    _componentDictionary.Add(iState.StateType, component);
+                    iState.Initialize(this);
+                }
+            }
         }
 
-        /// <summary>
-        /// Transitions from the current state to the specified state. The current State must not be null.
-        /// </summary>
-        public void TransitionToState<State>() where State : MonoBehaviour, IState<T>
+        public void SetEntryState(TEnum state)
         {
-            _activeState.enabled = false;
-            ((IState<T>)_activeState).Exit();
+            if (ActiveStateComponent != null) return;
 
-            if (!_states.TryGetValue(typeof(State), out MonoBehaviour state))
-                state = CreateNewStateInstance<State>();
+            if (_componentDictionary.TryGetValue(state, out MonoBehaviour component))
+            {
+                ActiveStateComponent = component;
+                _activeState = (IState<StateMachine<TEnum>, TEnum>)component;
+                ActiveStateComponent.enabled = true;
+                _activeState.Enter();
 
-            _activeState = state;
-
-            ((IState<T>)_activeState).Enter();
-            _activeState.enabled = true;
-
-            OnStateChanged?.Invoke(_activeState);
+                OnStateChanged?.Invoke(state);
+            }
         }
 
-        State CreateNewStateInstance<State>() where State : MonoBehaviour, IState<T>
+        public void TransitionToState(TEnum nextState)
         {
-            State state = gameObject.AddComponent<State>();
-            (state as IState<T>)?.Initialize((T)this);
+            if (_componentDictionary.TryGetValue(nextState, out MonoBehaviour component))
+            {
 
-            _states[typeof(State)] = state;
-            return state;
+                _activeState.Exit();
+                ActiveStateComponent.enabled = false;
+
+                ActiveStateComponent = component;
+
+                ActiveStateComponent = component;
+                _activeState = (IState<StateMachine<TEnum>, TEnum>)component;
+                ActiveStateComponent.enabled = true;
+                _activeState.Enter();
+
+                OnStateChanged?.Invoke(nextState);
+            }
         }
     }
 }

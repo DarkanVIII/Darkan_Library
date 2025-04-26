@@ -1,8 +1,11 @@
+using System;
+
 namespace Darkan.Systems.StateMachine.Component.New
 {
-    public interface IState<T> where T : StateMachine<T>
+    public interface IState<TMachine, TEnum> where TMachine : StateMachine<TEnum> where TEnum : Enum
     {
-        void Initialize(T stateMachine);
+        public TEnum StateType { get; }
+        void Initialize(TMachine stateMachine);
         void Enter();
         void Exit();
     }
