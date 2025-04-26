@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Darkan.Systems.StateMachine.Component.New
 {
-    public abstract class StateMachine<TEnum> : MonoBehaviour where TEnum : Enum
+    public abstract class StateMachine<TEnum, TMachine> : MonoBehaviour where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
     {
         public event Action<TEnum> OnStateChanged;
 
@@ -19,19 +19,20 @@ namespace Darkan.Systems.StateMachine.Component.New
         [ReadOnly]
         public MonoBehaviour ActiveStateComponent;
 
-        IState<StateMachine<TEnum>, TEnum> _activeState;
+        IState<TMachine, TEnum> _activeState;
 
         protected virtual void Awake()
         {
             MonoBehaviour[] components = GetComponents<MonoBehaviour>();
 
+
             foreach (MonoBehaviour component in components)
             {
-                if (component is IState<StateMachine<TEnum>, TEnum> iState)
+                if (component is IState<TMachine, TEnum> iState)
                 {
                     component.enabled = false;
                     _componentDictionary.Add(iState.StateType, component);
-                    iState.Initialize(this);
+                    iState.Initialize((TMachine)this);
                 }
             }
         }
@@ -43,7 +44,7 @@ namespace Darkan.Systems.StateMachine.Component.New
             if (_componentDictionary.TryGetValue(state, out MonoBehaviour component))
             {
                 ActiveStateComponent = component;
-                _activeState = (IState<StateMachine<TEnum>, TEnum>)component;
+                _activeState = (IState<TMachine, TEnum>)component;
                 ActiveStateComponent.enabled = true;
                 _activeState.Enter();
 
@@ -62,7 +63,7 @@ namespace Darkan.Systems.StateMachine.Component.New
                 ActiveStateComponent = component;
 
                 ActiveStateComponent = component;
-                _activeState = (IState<StateMachine<TEnum>, TEnum>)component;
+                _activeState = (IState<TMachine, TEnum>)component;
                 ActiveStateComponent.enabled = true;
                 _activeState.Enter();
 
