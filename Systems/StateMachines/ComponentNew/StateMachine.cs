@@ -14,16 +14,28 @@ namespace Darkan.Systems.StateMachine.Component.New
         [ShowInInspector, ReadOnly]
         protected MonoBehaviour _activeState;
 
+        public void SetEntryState<State>() where State : MonoBehaviour, IState<T>
+        {
+            if (_activeState != null) return;
+
+            if (!_states.TryGetValue(typeof(State), out MonoBehaviour state))
+                state = CreateNewStateInstance<State>();
+
+            _activeState = state;
+
+            ((IState<T>)_activeState).Enter();
+            _activeState.enabled = true;
+
+            OnStateChanged?.Invoke(_activeState);
+        }
+
         /// <summary>
-        /// Transitions to the specified state. If the state is not already created, it will be created and added to the state machine.
+        /// Transitions from the current state to the specified state. The current State must not be null.
         /// </summary>
         public void TransitionToState<State>() where State : MonoBehaviour, IState<T>
         {
-            if (_activeState != null)
-            {
-                _activeState.enabled = false;
-                ((IState<T>)_activeState).Exit();
-            }
+            _activeState.enabled = false;
+            ((IState<T>)_activeState).Exit();
 
             if (!_states.TryGetValue(typeof(State), out MonoBehaviour state))
                 state = CreateNewStateInstance<State>();

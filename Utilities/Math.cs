@@ -24,10 +24,7 @@ namespace Darkan.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float RadToDot(float radians)
-        {
-            return Mathf.Cos(radians);
-        }
+        public static float RadToDot(float radians) => Mathf.Cos(radians);
 
         /// <summary>
         /// Starts from y = 1, x = 0
@@ -42,16 +39,10 @@ namespace Darkan.Utilities
         /// Starts from y = 1, x = 0
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float FrwDirToAngle(Vector2 dir)
-        {
-            return Mathf.Atan2(dir.x, dir.y);
-        }
+        public static float FrwDirToAngle(Vector2 dir) => Mathf.Atan2(dir.x, dir.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float DirToAngle(Vector2 dir)
-        {
-            return Mathf.Atan2(dir.y, dir.x);
-        }
+        public static float DirToAngle(Vector2 dir) => Mathf.Atan2(dir.y, dir.x);
 
         /// <summary>
         /// "Determinant" or "Wedge Product" or "Perpendicular Dot Product"<br></br>

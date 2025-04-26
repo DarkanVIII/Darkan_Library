@@ -7,10 +7,7 @@ namespace Darkan.Utilities
     public static class Extensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Contains(this LayerMask layerMask, int layer)
-        {
-            return (layerMask & (1 << layer)) != 0;
-        }
+        public static bool Contains(this LayerMask layerMask, int layer) => (layerMask & (1 << layer)) != 0;
 
         /// <summary>
         /// Shuffles a list. Good performance. Meh randomness.
@@ -79,15 +76,9 @@ namespace Darkan.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float ClampMin(this float input, float minValue)
-        {
-            return input < minValue ? minValue : input;
-        }
+        public static float ClampMin(this float input, float minValue) => input < minValue ? minValue : input;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int ClampMin(this int input, int minValue)
-        {
-            return input < minValue ? minValue : input;
-        }
+        public static int ClampMin(this int input, int minValue) => input < minValue ? minValue : input;
     }
 }
