@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -7,8 +7,13 @@ namespace Darkan.Editor
 {
     public class CreateMonobehaviourWindow : EditorWindow
     {
-        const string DEFAULT_NAME = "Monobehaviour";
+        [System.Serializable]
+        class AsmdefJson
+        {
+            public string rootNamespace;
+        }
 
+        const string _defaultName = "Monobehaviour";
         static bool _firstFrame;
         static bool _enterClicked;
         static bool _escapeClicked;
@@ -90,7 +95,7 @@ namespace Darkan.Editor
             {
                 if (_inputStrings.Count - 1 < i)
                 {
-                    _inputStrings.Add(DEFAULT_NAME + (i + 1));
+                    _inputStrings.Add(_defaultName + (i + 1));
                 }
 
                 GUILayout.BeginHorizontal();
@@ -139,6 +144,8 @@ namespace Darkan.Editor
 
         void CreateScripts()
         {
+            List<string> assetPaths = new();
+
             try
             {
                 AssetDatabase.StartAssetEditing();
@@ -149,11 +156,12 @@ namespace Darkan.Editor
 
                     if (!string.IsNullOrEmpty(name))
                     {
-                        CreateMonobehaviourTemplate(name);
+                        if (CreateMonobehaviourTemplate(name, out string assetPath))
+                            assetPaths.Add(assetPath);
                     }
                     else
                     {
-                        Debug.LogWarning("Scipts with empty class names can't be created.");
+                        Debug.LogWarning("Scripts with empty class names can't be created.");
                     }
                 }
             }
@@ -161,15 +169,50 @@ namespace Darkan.Editor
             {
                 AssetDatabase.StopAssetEditing();
                 AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+
+                // open created scrips
+                foreach (string assetPath in assetPaths)
+                {
+                    MonoScript assetToOpen = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+
+                    if (assetToOpen != null)
+                        AssetDatabase.OpenAsset(assetToOpen);
+                }
+
                 Close();
             }
         }
 
-        void CreateMonobehaviourTemplate(string scriptName)
+        string GetRootNamespaceForPath(string assetPath)
         {
+            string absolutePath = Path.GetFullPath(assetPath);
+            string directory = Path.GetDirectoryName(absolutePath);
+
+            while (!string.IsNullOrEmpty(directory))
+            {
+                string[] asmdefFiles = Directory.GetFiles(directory, "*.asmdef", SearchOption.TopDirectoryOnly);
+
+                if (asmdefFiles.Length > 0)
+                {
+                    string asmdefPath = asmdefFiles[0];
+                    string json = File.ReadAllText(asmdefPath);
+                    var asmdef = JsonUtility.FromJson<AsmdefJson>(json);
+                    return asmdef.rootNamespace ?? "";
+                }
+
+                directory = Path.GetDirectoryName(directory); // go up one level
+            }
+
+            return ""; // No asmdef found → default Assembly-CSharp
+        }
+
+        bool CreateMonobehaviourTemplate(string scriptName, out string assetPath)
+        {
+            assetPath = null;
+
             Object selectedObject = Selection.activeObject;
 
-            if (selectedObject == null) return;
+            if (selectedObject == null) return false;
 
             string destinationPath = AssetDatabase.GetAssetPath(selectedObject);
 
@@ -178,26 +221,34 @@ namespace Darkan.Editor
                 destinationPath = Path.GetDirectoryName(destinationPath);
             }
 
-            string filePath = destinationPath + "/" + scriptName + ".cs";
+            assetPath = destinationPath + "/" + scriptName + ".cs";
 
             // Ensure the file name is unique
-            filePath = AssetDatabase.GenerateUniqueAssetPath(filePath);
-            scriptName = Path.GetFileName(filePath);
+            assetPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
+            scriptName = Path.GetFileName(assetPath);
             scriptName = scriptName.Replace(".cs", "");
+            string rootNamespace = GetRootNamespaceForPath(assetPath);
+
+            if (string.IsNullOrEmpty(rootNamespace))
+                rootNamespace = "Game";
 
             string scriptContent =
-    @"// Author: #USERNAME#
-
-using UnityEngine;
-
-public class #SCRIPTNAME# : MonoBehaviour
+@"namespace #ROOTNAMESPACE#
 {
+    using UnityEngine;
+
+    public class #SCRIPTNAME# : MonoBehaviour
+    {
     
+    }
 }";
             scriptContent = scriptContent.Replace("#SCRIPTNAME#", scriptName);
-            scriptContent = scriptContent.Replace("#USERNAME#", System.Environment.UserName);
+            scriptContent = scriptContent.Replace("#ROOTNAMESPACE#", rootNamespace);
+            //scriptContent = scriptContent.Replace("#USERNAME#", System.Environment.UserName);
 
-            File.WriteAllText(filePath, scriptContent);
+            File.WriteAllText(assetPath, scriptContent);
+
+            return true;
         }
     }
 }
