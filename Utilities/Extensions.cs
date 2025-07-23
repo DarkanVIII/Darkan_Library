@@ -47,6 +47,13 @@ namespace Darkan.Utilities
             return new Vector2(vector3.x, vector3.z).normalized;
         }
 
+        /// <returns>Returns a Vector2 with the x and z components of the Vector3</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 FlatVec2(this Vector3 vector3)
+        {
+            return new Vector2(vector3.x, vector3.z);
+        }
+
         /// <returns>Returns the input Vector with y = 0 and normalized</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 FlatNormal(this Vector3 vector3)
@@ -73,6 +80,15 @@ namespace Darkan.Utilities
         {
             vector3.y = 0;
             return vector3;
+        }
+
+        /// <summary>
+        /// Rotates the vector by degrees around world y-axis.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Rotate(this Vector3 vector3, float angle)
+        {
+            return Quaternion.AngleAxis(angle, Vector3.up) * vector3;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
