@@ -40,6 +40,16 @@ namespace Darkan.Utilities
             return thisColor;
         }
 
+        /// <summary>
+        ///  Destroyed UnityObjects return null.<br></br>
+        ///  Otherwise returns the UnityObject.<br></br>
+        ///  Helps with chaining instructions.  
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T OrNull<T>(this T unityObject) where T : Object => unityObject ? unityObject : null;
+
+        #region Math
+
         /// <returns>Returns a Vector2 with the x and z components of the Vector3 and normalized</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 FlatVec2Normal(this Vector3 vector3)
@@ -96,5 +106,7 @@ namespace Darkan.Utilities
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ClampMin(this int input, int minValue) => input < minValue ? minValue : input;
+
+        #endregion
     }
 }
