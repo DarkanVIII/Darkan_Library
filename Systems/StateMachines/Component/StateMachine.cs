@@ -11,18 +11,16 @@ namespace Darkan.Systems.StateMachine.Component.New
 
         protected Dictionary<TEnum, MonoBehaviour> _componentDictionary = new();
 
-        [ShowInInspector]
-        [ReadOnly]
+        [ShowInInspector, ReadOnly]
         public TEnum ActiveStateType => _activeState != null ? _activeState.StateType : default;
 
-        [ShowInInspector]
-        [ReadOnly]
+        [ShowInInspector, ReadOnly]
         public MonoBehaviour ActiveStateComponent;
         public abstract TEnum EntryState { get; }
         public TEnum LastStateType { get; private set; }
 
+        readonly List<IState<TMachine, TEnum>> _states = new();
         IState<TMachine, TEnum> _activeState;
-        List<IState<TMachine, TEnum>> _states;
 
         protected virtual void Awake()
         {
