@@ -6,6 +6,7 @@ namespace Darkan.Systems.StateMachine.Component.New
     {
         public TEnum StateType { get; }
         void Initialize(TMachine stateMachine);
+        void Start() { }
         void Enter();
         void Exit();
     }

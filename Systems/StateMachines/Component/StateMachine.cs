@@ -3,65 +3,67 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Darkan.Systems.StateMachine.Component
+namespace Darkan.Systems.StateMachine.Component.New
 {
-
     public abstract class StateMachine<TEnum, TMachine> : MonoBehaviour where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
     {
         public event Action<TEnum> OnStateChanged;
 
-        protected Dictionary<TEnum, StateBase<TEnum, TMachine>> StatesDictionary = new();
+        protected Dictionary<TEnum, MonoBehaviour> _componentDictionary = new();
 
         [ShowInInspector]
         [ReadOnly]
-        public TEnum ActiveState => ActiveStateComponent != null ? ActiveStateComponent.State : default;
+        public TEnum ActiveStateType => _activeState != null ? _activeState.StateType : default;
 
         [ShowInInspector]
         [ReadOnly]
-        protected StateBase<TEnum, TMachine> ActiveStateComponent;
+        public MonoBehaviour ActiveStateComponent;
+        public abstract TEnum EntryState { get; }
+        public TEnum LastStateType { get; private set; }
+
+        IState<TMachine, TEnum> _activeState;
+        List<IState<TMachine, TEnum>> _states;
 
         protected virtual void Awake()
         {
-            var states = GetComponents<StateBase<TEnum, TMachine>>();
+            var components = GetComponents<MonoBehaviour>();
 
-            foreach (StateBase<TEnum, TMachine> state in states)
+            foreach (MonoBehaviour component in components)
             {
-                StatesDictionary.Add(state.State, state);
-
-                state.Init((TMachine)this);
-                state.enabled = false;
+                if (component is IState<TMachine, TEnum> iState)
+                {
+                    _states.Add(iState);
+                    component.enabled = false;
+                    _componentDictionary.Add(iState.StateType, component);
+                    iState.Initialize((TMachine)this);
+                }
             }
         }
 
         protected virtual void Start()
         {
-            TEnum entryState = SetEntryState();
+            foreach (var state in _states)
+                state.Start();
 
-            if (StatesDictionary.TryGetValue(entryState, out var state))
-            {
-                ActiveStateComponent = state;
-                ActiveStateComponent.EnterState();
-                ActiveStateComponent.enabled = true;
-
-                OnStateChanged?.Invoke(entryState);
-            }
+            TransitionToState(EntryState);
         }
-
-        public abstract TEnum SetEntryState();
 
         public void TransitionToState(TEnum nextState)
         {
-            if (ActiveStateComponent != null)
+            if (_componentDictionary.TryGetValue(nextState, out MonoBehaviour component))
             {
-                ActiveStateComponent.ExitState();
-                ActiveStateComponent.enabled = false;
-            }
+                if (_activeState != null)
+                {
+                    _activeState.Exit();
+                    ActiveStateComponent.enabled = false;
+                    LastStateType = _activeState.StateType;
+                }
 
-            if (StatesDictionary.TryGetValue(nextState, out var state))
-            {
-                ActiveStateComponent = state;
-                ActiveStateComponent.EnterState();
+                ActiveStateComponent = component;
+
+                _activeState = (IState<TMachine, TEnum>)component;
                 ActiveStateComponent.enabled = true;
+                _activeState.Enter();
 
                 OnStateChanged?.Invoke(nextState);
             }
