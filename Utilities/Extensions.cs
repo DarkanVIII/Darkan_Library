@@ -107,6 +107,12 @@ namespace Darkan.Utilities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ClampMin(this int input, int minValue) => input < minValue ? minValue : input;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Closer(this float input, float targetA, float targetB)
+        {
+            return Mathf.Abs(input - targetA) < Mathf.Abs(input - targetB) ? targetA : targetB;
+        }
+
         #endregion
     }
 }
