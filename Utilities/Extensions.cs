@@ -26,14 +26,6 @@ namespace Darkan.Utilities
             return list;
         }
 
-        /// <returns>The world position of the RectTransform relative to the Camera</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 WorldPosition(this RectTransform rectTrans, Camera camera)
-        {
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTrans, rectTrans.position, camera, out Vector3 result);
-            return result;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color SetAlpha(this Color thisColor, float alpha)
         {
@@ -49,7 +41,23 @@ namespace Darkan.Utilities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T OrNull<T>(this T unityObject) where T : Object => unityObject ? unityObject : null;
 
-        #region Math
+        /// <returns>The world position of the RectTransform relative to the Camera</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 WorldPosition(this RectTransform rectTrans, Camera camera)
+        {
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTrans, rectTrans.position, camera, out Vector3 result);
+            return result;
+        }
+
+        #region Vector2
+
+        /// <returns>Vector3(vector2.x, 0, vector2.y)</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ToFlatVector3(this Vector2 vector2) => new(vector2.x, 0, vector2.y);
+
+        #endregion
+
+        #region Vector3
 
         /// <returns>Returns a Vector2 with the x and z components of the Vector3 and normalized</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -111,6 +119,8 @@ namespace Darkan.Utilities
             return Quaternion.AngleAxis(angle, Vector3.up) * vector3;
         }
 
+        #endregion
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampMin(this float input, float minValue) => input < minValue ? minValue : input;
 
@@ -122,7 +132,5 @@ namespace Darkan.Utilities
         {
             return Mathf.Abs(input - targetA) < Mathf.Abs(input - targetB) ? targetA : targetB;
         }
-
-        #endregion
     }
 }
