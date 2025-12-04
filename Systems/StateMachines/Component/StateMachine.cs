@@ -1,48 +1,46 @@
-using Sirenix.OdinInspector;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Darkan.Systems.StateMachine.Component.New
+namespace Darkan.Systems.StateMachine.Component
 {
+    using System;
+    using System.Collections.Generic;
+    using Sirenix.OdinInspector;
+    using UnityEngine;
+
     public abstract class StateMachine<TEnum, TMachine> : MonoBehaviour where TEnum : Enum where TMachine : StateMachine<TEnum, TMachine>
     {
-        public event Action<TEnum> OnStateChanged;
+        #region Serialized Fields
 
-        protected Dictionary<TEnum, MonoBehaviour> _componentDictionary = new();
+        [ShowInInspector, ReadOnly]
+        public MonoBehaviour ActiveStateComponent;
+
+        #endregion
+
+        public event Action<TEnum> OnStateChanged;
 
         [ShowInInspector, ReadOnly]
         public TEnum ActiveStateType => _activeState != null ? _activeState.StateType : default;
 
-        [ShowInInspector, ReadOnly]
-        public MonoBehaviour ActiveStateComponent;
         public abstract TEnum EntryState { get; }
         public TEnum LastStateType { get; private set; }
 
-        readonly List<IState<TMachine, TEnum>> _states = new();
+        protected Dictionary<TEnum, MonoBehaviour> _componentDictionary = new();
         IState<TMachine, TEnum> _activeState;
+
+        #region Unity Methods
 
         protected virtual void Awake()
         {
-            var components = GetComponents<MonoBehaviour>();
+            MonoBehaviour[] components = GetComponents<MonoBehaviour>();
 
             foreach (MonoBehaviour component in components)
-            {
                 if (component is IState<TMachine, TEnum> iState)
                 {
-                    _states.Add(iState);
                     component.enabled = false;
                     _componentDictionary.Add(iState.StateType, component);
                     iState.Initialize((TMachine)this);
                 }
-            }
         }
 
-        protected virtual void Start()
-        {
-            foreach (var state in _states)
-                state.Start();
-        }
+        #endregion
 
         public void TransitionToState(TEnum nextState)
         {
