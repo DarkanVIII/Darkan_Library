@@ -42,8 +42,6 @@ namespace Darkan.Systems.StateMachine.Component.New
         {
             foreach (var state in _states)
                 state.Start();
-
-            TransitionToState(EntryState);
         }
 
         public void TransitionToState(TEnum nextState)
