@@ -18,18 +18,8 @@ namespace Game
         public static MainToolbarElement CreateTimeScaleSlider()
         {
             var icon = EditorGUIUtility.IconContent("UnityEditor.AnimationWindow").image as Texture2D;
-            MainToolbarContent content = new(icon, "Set Time Scale");
-
+            MainToolbarContent content = new(Time.timeScale.ToString(), icon, "Set Time Scale");
             MainToolbarDropdown dropdown = new(content, OnOpenDropdown);
-            dropdown.populateContextMenu = (menu) =>
-            {
-                menu.InsertAction(menu.MenuItems().Count, "Reset to 1", _ =>
-                {
-                    Time.timeScale = 1;
-                    MainToolbar.Refresh(_timeScaleDropdownPath);
-                });
-            };
-
             return dropdown;
         }
 
@@ -40,26 +30,25 @@ namespace Game
             menu.AddItem(new GUIContent("1"), Time.timeScale == 1f, () =>
             {
                 Time.timeScale = 1f;
-                MainToolbar.Refresh("Darkan/Time Scale Slider");
+                MainToolbar.Refresh(_timeScaleDropdownPath);
             });
-
 
             menu.AddItem(new GUIContent("0"), Time.timeScale == 0f, () =>
             {
                 Time.timeScale = 0f;
-                MainToolbar.Refresh("Darkan/Time Scale Slider");
+                MainToolbar.Refresh(_timeScaleDropdownPath);
             });
 
             menu.AddItem(new GUIContent("2"), Time.timeScale == 2f, () =>
             {
                 Time.timeScale = 2f;
-                MainToolbar.Refresh("Darkan/Time Scale Slider");
+                MainToolbar.Refresh(_timeScaleDropdownPath);
             });
 
             menu.AddItem(new GUIContent("5"), Time.timeScale == 5f, () =>
             {
                 Time.timeScale = 5f;
-                MainToolbar.Refresh("Darkan/Time Scale Slider");
+                MainToolbar.Refresh(_timeScaleDropdownPath);
             });
 
             menu.DropDown(rect);
@@ -101,8 +90,12 @@ namespace Game
                     foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
                     {
                         string sceneName = Path.GetFileNameWithoutExtension(scene.path);
+                        string label = sceneName;
 
-                        menu.AddItem(new GUIContent(sceneName), false, () =>
+                        if (GetActiveSceneName() == sceneName)
+                            label += " (Active)";
+
+                        menu.AddItem(new GUIContent(label), false, () =>
                         {
                             SwitchScene(scene.path);
                         });
@@ -152,10 +145,8 @@ namespace Game
         {
             string activeSceneName;
 
-            if (Application.isPlaying)
-                activeSceneName = SceneManager.GetActiveScene().name;
-            else
-                activeSceneName = EditorSceneManager.GetActiveScene().name;
+            activeSceneName = GetActiveSceneName();
+
             if (activeSceneName.Length == 0)
                 activeSceneName = "Untitled";
 
@@ -179,11 +170,15 @@ namespace Game
                     foreach (string path in scenePaths)
                     {
                         string sceneName = Path.GetFileNameWithoutExtension(path);
+                        string label = sceneName;
 
-                        menu.AddItem(new GUIContent(sceneName), false, () =>
-                        {
-                            SwitchScene(path);
-                        });
+                        if (GetActiveSceneName() == sceneName)
+                            label += " (Active)";
+
+                        menu.AddItem(new GUIContent(label), false, () =>
+                            {
+                                SwitchScene(path);
+                            });
                     }
                 }
 
@@ -239,6 +234,16 @@ namespace Game
 
                 return scenePaths;
             }
+        }
+
+        static string GetActiveSceneName()
+        {
+            string activeSceneName;
+            if (Application.isPlaying)
+                activeSceneName = SceneManager.GetActiveScene().name;
+            else
+                activeSceneName = EditorSceneManager.GetActiveScene().name;
+            return activeSceneName;
         }
 
         #endregion
