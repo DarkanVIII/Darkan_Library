@@ -18,40 +18,25 @@ namespace Game
         public static MainToolbarElement CreateTimeScaleSlider()
         {
             var icon = EditorGUIUtility.IconContent("UnityEditor.AnimationWindow").image as Texture2D;
-            MainToolbarContent content = new(Time.timeScale.ToString(), icon, "Set Time Scale");
-            MainToolbarDropdown dropdown = new(content, OnOpenDropdown);
-            return dropdown;
+            MainToolbarContent content = new("Time x", icon, "Set Time Scale");
+            MainToolbarSlider slider = new(content, Time.timeScale, 0f, 5f, OnTimeScaleChanged)
+            {
+                populateContextMenu = (menu) =>
+                {
+                    menu.InsertAction(menu.MenuItems().Count, "Reset to 1", _ =>
+                    {
+                        Time.timeScale = 1;
+                        MainToolbar.Refresh(_timeScaleDropdownPath);
+                    });
+                }
+            };
+
+            return slider;
         }
 
-        static void OnOpenDropdown(Rect rect)
+        static void OnTimeScaleChanged(float value)
         {
-            GenericMenu menu = new GenericMenu();
-
-            menu.AddItem(new GUIContent("1"), Time.timeScale == 1f, () =>
-            {
-                Time.timeScale = 1f;
-                MainToolbar.Refresh(_timeScaleDropdownPath);
-            });
-
-            menu.AddItem(new GUIContent("0"), Time.timeScale == 0f, () =>
-            {
-                Time.timeScale = 0f;
-                MainToolbar.Refresh(_timeScaleDropdownPath);
-            });
-
-            menu.AddItem(new GUIContent("2"), Time.timeScale == 2f, () =>
-            {
-                Time.timeScale = 2f;
-                MainToolbar.Refresh(_timeScaleDropdownPath);
-            });
-
-            menu.AddItem(new GUIContent("5"), Time.timeScale == 5f, () =>
-            {
-                Time.timeScale = 5f;
-                MainToolbar.Refresh(_timeScaleDropdownPath);
-            });
-
-            menu.DropDown(rect);
+            Time.timeScale = value;
         }
 
         #endregion
