@@ -26,8 +26,9 @@ namespace Darkan.Systems.StateMachine.Basic
         {
             if (!_states.TryGetValue(typeof(State), out T to))
             {
-                to = (T)Activator.CreateInstance(typeof(State), this);
+                to = Activator.CreateInstance<State>();
                 _states[typeof(State)] = to;
+                to.Initialize(this);
             }
 
             CurrentState?.Exit();
@@ -47,9 +48,9 @@ namespace Darkan.Systems.StateMachine.Basic
 
     public abstract class State<T> : IDisposable where T : State<T>
     {
-        protected StateMachine<T> _stateMachine;
+        protected StateMachine<T> _stateMachine { get; private set; }
 
-        public State(StateMachine<T> stateMachine)
+        public void Initialize(StateMachine<T> stateMachine)
         {
             _stateMachine = stateMachine;
         }
