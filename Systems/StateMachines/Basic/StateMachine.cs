@@ -1,15 +1,34 @@
 namespace Darkan.Systems.StateMachine.Basic
 {
     using System;
+    using System.Collections.Generic;
 
     public class StateMachine<T> : IDisposable where T : State<T>
     {
         public event Action<T> OnStateChanged;
         public T CurrentState { get; private set; }
 
+        readonly Dictionary<Type, T> _states = new();
+
         public void ChangeState(T to)
         {
             if (to == null) return;
+
+            CurrentState?.Exit();
+
+            CurrentState = to;
+            OnStateChanged?.Invoke(CurrentState);
+
+            CurrentState.Enter();
+        }
+
+        public void ChangeState<State>() where State : T
+        {
+            if (!_states.TryGetValue(typeof(State), out T to))
+            {
+                to = (T)Activator.CreateInstance(typeof(State), this);
+                _states[typeof(State)] = to;
+            }
 
             CurrentState?.Exit();
 
