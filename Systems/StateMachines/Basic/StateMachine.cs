@@ -3,14 +3,14 @@ namespace Darkan.Systems.StateMachine.Basic
     using System;
     using System.Collections.Generic;
 
-    public abstract class StateMachine : IDisposable
+    public abstract class StateMachine<T> : IDisposable where T : StateMachine<T>
     {
-        public event Action<State<StateMachine>> OnStateChanged;
-        public State<StateMachine> CurrentState { get; private set; }
+        public event Action<State<T>> OnStateChanged;
+        public State<T> CurrentState { get; private set; }
 
-        readonly Dictionary<Type, State<StateMachine>> _states = new();
+        readonly Dictionary<Type, State<T>> _states = new();
 
-        public void ChangeState(State<StateMachine> to)
+        public void ChangeState(State<T> to)
         {
             if (to == null) return;
 
@@ -22,15 +22,15 @@ namespace Darkan.Systems.StateMachine.Basic
             CurrentState.Enter();
         }
 
-        public void ChangeState<State>() where State : State<StateMachine>
+        public void ChangeState<State>() where State : State<T>
         {
             CurrentState?.Exit();
 
-            if (!_states.TryGetValue(typeof(State), out State<StateMachine> to))
+            if (!_states.TryGetValue(typeof(State), out State<T> to))
             {
                 to = Activator.CreateInstance<State>();
                 _states[typeof(State)] = to;
-                to.Initialize(this);
+                to.Initialize((T)this);
             }
 
             CurrentState = to;
@@ -46,7 +46,7 @@ namespace Darkan.Systems.StateMachine.Basic
         }
     }
 
-    public abstract class State<T> : IDisposable where T : StateMachine
+    public abstract class State<T> : IDisposable where T : StateMachine<T>
     {
         protected T _stateMachine { get; private set; }
 
