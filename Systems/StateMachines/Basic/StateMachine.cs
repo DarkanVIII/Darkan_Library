@@ -11,6 +11,19 @@ namespace Darkan.Systems.StateMachine.Basic
 
         readonly Dictionary<Type, State<TMachine>> _states = new();
 
+        /// <summary>
+        /// Use if a state instance was created outside ahead of time. It will be initialized and stored. 
+        /// Useful for states that require constructor parameters.
+        /// </summary>
+        public void RegisterState(State<TMachine> instance)
+        {
+            if (!_states.ContainsKey(instance.GetType()))
+            {
+                _states[instance.GetType()] = instance;
+                instance.Initialize((TMachine)this);
+            }
+        }
+
         public void ChangeState<TState>() where TState : State<TMachine>
         {
             CurrentState?.Exit();
