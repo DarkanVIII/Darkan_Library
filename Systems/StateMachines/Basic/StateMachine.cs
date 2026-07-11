@@ -25,7 +25,7 @@ namespace Darkan.Systems.StateMachine.Basic
             CurrentState = to;
             OnStateChanged?.Invoke(CurrentState);
 
-            CurrentState.OnEnter();
+            CurrentState.Enter();
         }
 
         public void Dispose()
@@ -56,7 +56,10 @@ namespace Darkan.Systems.StateMachine.Basic
             _stateMachine = stateMachine;
         }
 
-        public abstract void OnEnter();
+        public void Enter()
+        {
+            OnEnter();
+        }
 
         public void Exit()
         {
@@ -80,7 +83,8 @@ namespace Darkan.Systems.StateMachine.Basic
             OnDispose();
         }
 
+        protected abstract void OnEnter();
         protected abstract void OnExit();
-        protected abstract void OnDispose();
+        protected virtual void OnDispose() { }
     }
 }
