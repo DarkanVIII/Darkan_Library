@@ -2,6 +2,7 @@ namespace Darkan.Systems.StateMachine.Basic
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
 
     public abstract class StateMachine<TMachine> : IDisposable where TMachine : StateMachine<TMachine>
     {
@@ -24,7 +25,7 @@ namespace Darkan.Systems.StateMachine.Basic
             CurrentState = to;
             OnStateChanged?.Invoke(CurrentState);
 
-            CurrentState.Enter();
+            CurrentState.OnEnter();
         }
 
         public void Dispose()
@@ -39,16 +40,47 @@ namespace Darkan.Systems.StateMachine.Basic
     public abstract class State<TMachine> : IDisposable where TMachine : StateMachine<TMachine>
     {
         protected TMachine _stateMachine { get; private set; }
+        protected CancellationToken _cancellationToken
+        {
+            get
+            {
+                _cts ??= new CancellationTokenSource();
+                return _cts.Token;
+            }
+        }
+
+        CancellationTokenSource _cts;
 
         public void Initialize(TMachine stateMachine)
         {
             _stateMachine = stateMachine;
         }
 
-        public abstract void Enter();
-        public abstract void Exit();
-        public virtual void Update() { }
-        public virtual void FixedUpdate() { }
-        public virtual void Dispose() { }
+        public abstract void OnEnter();
+
+        public void Exit()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+            }
+
+            OnExit();
+        }
+
+        public void Dispose()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+            }
+
+            OnDispose();
+        }
+
+        protected abstract void OnExit();
+        protected abstract void OnDispose();
     }
 }
