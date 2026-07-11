@@ -28,6 +28,29 @@ namespace Darkan.Systems.StateMachine.Basic
             CurrentState.Enter();
         }
 
+        public void ChangeState(Type stateType)
+        {
+            if (!typeof(State<TMachine>).IsAssignableFrom(stateType))
+            {
+                UnityEngine.Debug.LogWarning($"Type {stateType} is not a valid state type.");
+                return;
+            }
+
+            CurrentState?.Exit();
+
+            if (!_states.TryGetValue(stateType, out State<TMachine> to))
+            {
+                to = Activator.CreateInstance(stateType) as State<TMachine>;
+                _states[stateType] = to;
+                to.Initialize((TMachine)this);
+            }
+
+            CurrentState = to;
+            OnStateChanged?.Invoke(CurrentState);
+
+            CurrentState.Enter();
+        }
+
         public void Dispose()
         {
             foreach (var state in _states.Values)
