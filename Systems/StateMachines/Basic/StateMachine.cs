@@ -63,28 +63,28 @@ namespace Darkan.Systems.StateMachine.Basic
 
         public void Exit()
         {
-            if (_cts != null)
-            {
-                _cts.Cancel();
-                _cts.Dispose();
-            }
-
+            CancelAndDisposeCts();
             OnExit();
         }
 
         public void Dispose()
         {
-            if (_cts != null)
-            {
-                _cts.Cancel();
-                _cts.Dispose();
-            }
-
+            CancelAndDisposeCts();
             OnDispose();
         }
 
         protected abstract void OnEnter();
         protected abstract void OnExit();
         protected virtual void OnDispose() { }
+
+        void CancelAndDisposeCts()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
+            }
+        }
     }
 }
