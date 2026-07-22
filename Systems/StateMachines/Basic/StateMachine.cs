@@ -11,6 +11,8 @@ namespace Darkan.Systems.StateMachine.Basic
 
         readonly Dictionary<Type, State<TMachine>> _states = new();
 
+        bool _isStopped;
+
         /// <summary>
         /// Use if a state instance was created outside ahead of time. It will be initialized and stored. 
         /// Useful for states that require constructor parameters.
@@ -62,6 +64,23 @@ namespace Darkan.Systems.StateMachine.Basic
             OnStateChanged?.Invoke(CurrentState);
 
             CurrentState.Enter();
+        }
+
+        public void Resume()
+        {
+            if (!_isStopped) return;
+
+            if (CurrentState != null)
+            {
+                ChangeState(CurrentState.GetType());
+                _isStopped = false;
+            }
+        }
+
+        public void Stop()
+        {
+            CurrentState?.Exit();
+            _isStopped = true;
         }
 
         public void Dispose()
